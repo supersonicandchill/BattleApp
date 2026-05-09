@@ -1,734 +1,1373 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>TACO LOOPER</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        * {
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            background: #0f1419;
-            color: #e5e5e5;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
-        
-        body {
-            padding-bottom: env(safe-area-inset-bottom);
-            overflow-x: hidden;
-        }
-        
-        .bebas {
-            font-family: 'Bebas Neue', sans-serif;
-            letter-spacing: 0.05em;
-        }
-        
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-        
-        .orange { color: #E8763A; }
-        .orange-accent { color: #F0B429; }
-        .orange-bg { background-color: #E8763A; }
-        
-        canvas {
-            display: block;
-            width: 100%;
-            height: auto;
-            -webkit-user-select: none;
-            touch-action: none;
-        }
-        
-        .waveform-container {
-            position: relative;
-            width: 100%;
-            background: #1a1f26;
-            border-radius: 8px;
-            overflow: hidden;
-            height: 80px;
-        }
-        
-        .handle {
-            position: absolute;
-            width: 3px;
-            height: 100%;
-            cursor: col-resize;
-            -webkit-user-select: none;
-            background: #E8763A;
-            top: 0;
-            z-index: 10;
-            touch-action: none;
-        }
-        
-        .handle::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 32px;
-            height: 32px;
-            background: #E8763A;
-            border-radius: 4px;
-            opacity: 0.3;
-            margin-left: -16px;
-        }
-        
-        .handle:active::before {
-            opacity: 1;
-        }
-        
-        .playhead {
-            position: absolute;
-            top: 0;
-            width: 2px;
-            height: 100%;
-            background: #F0B429;
-            z-index: 11;
-            pointer-events: none;
-        }
-        
-        button {
-            transition: all 0.2s;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-            user-select: none;
-        }
-        
-        button:active {
-            transform: scale(0.95);
-        }
-        
-        .btn-play {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: #E8763A;
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        
-        .btn-small {
-            padding: 8px 12px;
-            border-radius: 6px;
-            background: #1a1f26;
-            border: 2px solid #E8763A;
-            color: #E8763A;
-            font-weight: 600;
-            font-size: 12px;
-            min-width: 0;
-        }
-        
-        .btn-small.active {
-            background: #E8763A;
-            color: #0f1419;
-        }
-        
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: #1a1f26;
-            outline: none;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #E8763A;
-            cursor: pointer;
-        }
-        
-        input[type="range"]::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #E8763A;
-            cursor: pointer;
-            border: none;
-        }
-        
-        .import-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-            gap: 30px;
-        }
-        
-        .drop-zone {
-            border: 3px dashed #E8763A;
-            border-radius: 12px;
-            padding: 40px 30px;
-            text-align: center;
-            transition: all 0.3s;
-            cursor: pointer;
-            width: 100%;
-            max-width: 320px;
-        }
-        
-        .drop-zone.dragover {
-            background: rgba(232, 118, 58, 0.1);
-            border-color: #F0B429;
-        }
-        
-        .hidden-file-input {
-            display: none;
-        }
-        
-        .main-container {
-            display: none;
-        }
-        
-        .main-container.active {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ledger">
+<meta name="theme-color" content="#0c1b33">
+<title>Ledger</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  /* Navy-blue palette — Every Man's Battle cover */
+  --bg:#0c1b33;
+  --bg2:#101f3c;
+  --surf:#162644;
+  --surf2:#1e3258;
+  --surf3:#26406e;
+  --bdr:#2a4a7a;
+  --bdr2:#3a6aaa;
+  --bdr3:#4a80c0;
+  --tx:#d0e4f8;
+  --tx2:#7aaad0;
+  --tx3:#4a6e9a;
+  --tx4:#2a4a6e;
+  --ac:#4a90d9;
+  --ac2:#6aaae8;
+  --grn:#3a8a5a;
+  --grn2:#285e3a;
+  --warm:#b87040;
+  --gold:#c8a040;
+  --r:4px;
+  --mono:'Courier New',Courier,monospace;
+  --sans:-apple-system,'Helvetica Neue',Arial,sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+button{font-family:var(--sans);cursor:pointer;border:none;-webkit-tap-highlight-color:transparent;}
+input,select,textarea{font-family:var(--sans);}
+
+/* ============================================================
+   SCREENS
+============================================================ */
+.screen{display:none;position:fixed;inset:0;z-index:500;flex-direction:column;align-items:center;justify-content:center;padding:44px 28px 36px;}
+.screen.active{display:flex;}
+
+/* Lock/Setup gradient background */
+#setup-screen,#lock-screen{
+  background:linear-gradient(175deg,#d0e4f0 0%,#6aaad4 25%,#2a5a9a 55%,#0c1b33 100%);
+}
+
+/* ============================================================
+   LOCK / SETUP UI
+============================================================ */
+.lkwrap{width:100%;max-width:300px;text-align:center;}
+.lkbrand{
+  font-family:var(--sans);font-size:2.4rem;font-weight:800;
+  color:#fff;letter-spacing:-.01em;margin-bottom:4px;
+  text-shadow:0 2px 16px rgba(0,0,0,.35);
+}
+.lkbrand-sub{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:10px;font-weight:400;}
+.lkbrand-tag{font-size:.7rem;color:rgba(255,255,255,.45);margin-bottom:36px;font-style:italic;}
+.lkwrap input{
+  width:100%;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.3);border-radius:var(--r);
+  color:#fff;font-family:var(--mono);font-size:1.5rem;letter-spacing:.18em;
+  padding:15px;outline:none;text-align:center;-webkit-appearance:none;margin-bottom:12px;
+}
+.lkwrap input::placeholder{color:rgba(255,255,255,.35);}
+.lkwrap input:focus{border-color:rgba(255,255,255,.65);}
+.lklbl{font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:7px;display:block;}
+.lkerr{min-height:18px;font-size:.72rem;color:#ffcc80;text-align:center;margin-bottom:10px;}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.mcard{
+  padding:18px 10px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.2);border-radius:var(--r);
+  color:rgba(255,255,255,.7);font-size:.82rem;letter-spacing:.08em;
+  text-transform:uppercase;cursor:pointer;transition:all .15s;font-weight:600;
+}
+.mcard.sel{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.6);color:#fff;}
+
+/* ============================================================
+   TOPBAR
+============================================================ */
+#topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 16px 10px;
+  background:linear-gradient(180deg,#0c1b33 0%,#142040 100%);
+  border-bottom:1px solid var(--bdr);flex-shrink:0;
+}
+.top-brand{
+  font-family:var(--sans);font-size:.9rem;font-weight:800;
+  letter-spacing:.01em;color:var(--tx);
+}
+.top-brand-sub{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);margin-top:1px;}
+.top-right{display:flex;align-items:center;gap:10px;}
+.top-streak{font-family:var(--mono);font-size:.72rem;color:var(--tx3);}
+.top-streak.hot{color:var(--gold);}
+.top-date{font-family:var(--mono);font-size:.66rem;color:var(--tx4);}
+
+/* ============================================================
+   CONTENT / VIEWS
+============================================================ */
+#content{flex:1;overflow-y:auto;}
+.view{display:none;padding:16px 16px 12px;}
+.view.active{display:block;}
+
+/* ============================================================
+   BOTTOM NAV — Manual first
+============================================================ */
+#navbar{
+  display:flex;background:var(--bg2);
+  border-top:1px solid var(--bdr);flex-shrink:0;
+}
+.nb{
+  flex:1;padding:8px 2px 7px;background:none;border:none;
+  color:var(--tx3);font-family:var(--sans);font-size:.58rem;letter-spacing:.03em;
+  text-transform:uppercase;font-weight:600;min-height:50px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:color .15s;
+}
+.nb-dot{width:4px;height:4px;border-radius:50%;background:transparent;transition:background .15s;}
+.nb.active{color:var(--ac2);}
+.nb.active .nb-dot{background:var(--ac);}
+
+/* ============================================================
+   DISCLAIMER
+============================================================ */
+.disc{font-size:.61rem;color:var(--tx4);text-align:center;padding:8px 16px 10px;border-top:1px solid var(--bdr);line-height:1.55;flex-shrink:0;}
+
+/* ============================================================
+   MANUAL — Hero section
+============================================================ */
+.manual-hero{
+  background:linear-gradient(160deg,var(--surf2) 0%,var(--surf) 100%);
+  border:1px solid var(--bdr);border-top:3px solid var(--ac);
+  border-radius:var(--r);padding:20px 18px;margin-bottom:18px;
+}
+.mhero-eyebrow{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ac);font-weight:700;margin-bottom:8px;}
+.mhero-title{font-size:1.25rem;font-weight:800;color:var(--tx);line-height:1.2;margin-bottom:4px;}
+.mhero-authors{font-size:.75rem;color:var(--tx3);margin-bottom:12px;font-style:italic;}
+.mhero-body{font-size:.84rem;color:var(--tx2);line-height:1.65;}
+
+/* Manual progress */
+.manual-prog{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.prog-bar{flex:1;height:5px;background:var(--surf2);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2));border-radius:3px;transition:width .4s;}
+.prog-lbl{font-family:var(--mono);font-size:.68rem;color:var(--tx3);white-space:nowrap;}
+
+/* Manual filter */
+.mfrow{display:flex;gap:6px;margin-bottom:16px;}
+.mfbtn{padding:6px 14px;background:var(--surf);border:1px solid var(--bdr);border-radius:12px;color:var(--tx3);font-size:.7rem;font-weight:600;cursor:pointer;transition:all .15s;}
+.mfbtn.active{background:var(--ac);border-color:var(--ac);color:#fff;}
+
+/* Chapter blocks */
+.ch-block{margin-bottom:18px;}
+.ch-head{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 0 8px;border-bottom:1px solid var(--bdr);
+}
+.ch-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.ch-num{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);}
+.ch-title{font-size:.9rem;font-weight:700;color:var(--tx2);}
+
+.msec-row{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 0;border-bottom:1px solid var(--bdr);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.msec-row:last-child{border-bottom:none;}
+.msec-read{
+  width:18px;height:18px;border:1.5px solid var(--bdr2);border-radius:3px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.msec-read.done{background:var(--grn);border-color:var(--grn);}
+.msec-read.done::after{content:'';display:block;width:4px;height:8px;border:2px solid #c4f0d0;border-top:none;border-left:none;transform:rotate(42deg) translateY(-1px);}
+.msec-title{font-size:.92rem;font-weight:500;color:var(--tx);flex:1;line-height:1.35;}
+.msec-bm{padding:4px 6px;background:none;border:none;color:var(--tx3);font-size:.82rem;cursor:pointer;}
+.msec-bm.bmon{color:var(--gold);}
+
+/* Section detail */
+.sdquote{
+  background:linear-gradient(135deg,var(--surf2),var(--surf));
+  border-left:3px solid var(--ac);border-radius:0 var(--r) var(--r) 0;
+  padding:14px 16px;margin-bottom:18px;
+}
+.sdqtext{font-size:.9rem;color:var(--tx);line-height:1.65;font-style:italic;margin-bottom:6px;font-weight:500;}
+.sdqby{font-size:.7rem;color:var(--tx3);letter-spacing:.06em;}
+.sdbody{font-size:.88rem;color:var(--tx2);line-height:1.75;margin-bottom:18px;}
+.sdh{font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ac);font-weight:700;margin:18px 0 10px;}
+.sdpoint{display:flex;gap:10px;margin-bottom:9px;font-size:.87rem;color:var(--tx2);line-height:1.55;}
+.sdpoint::before{content:'—';color:var(--bdr3);flex-shrink:0;font-weight:bold;}
+.sdtactic{display:flex;gap:10px;margin-bottom:8px;font-size:.87rem;color:var(--tx2);line-height:1.55;}
+.sdtactic::before{content:'›';color:var(--ac2);flex-shrink:0;font-weight:bold;font-size:1rem;}
+.scblk{background:var(--surf);border:1px solid var(--bdr);border-left:3px solid var(--bdr2);border-radius:0 var(--r) var(--r) 0;padding:12px 14px;margin-bottom:8px;}
+.scref{font-size:.68rem;color:var(--ac2);margin-bottom:4px;letter-spacing:.08em;font-weight:700;}
+.sctext{font-size:.87rem;color:var(--tx2);line-height:1.65;font-style:italic;}
+.refq{padding:11px 0;border-bottom:1px solid var(--bdr);font-size:.87rem;color:var(--tx2);line-height:1.55;}
+.refq:last-child{border-bottom:none;}
+.refq::before{content:attr(data-n)'. ';color:var(--tx3);font-family:var(--mono);font-size:.78rem;}
+
+/* ============================================================
+   SECTION — layout helpers
+============================================================ */
+.sec{margin-bottom:22px;}
+.shead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.slbl{font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3);font-weight:700;}
+
+/* ============================================================
+   FOCUS CARD (Today)
+============================================================ */
+.focus-card{
+  background:linear-gradient(145deg,var(--surf2) 0%,var(--surf3) 100%);
+  border:1px solid var(--bdr2);border-top:3px solid var(--ac);
+  border-radius:var(--r);padding:16px;margin-bottom:18px;cursor:pointer;
+  transition:border-color .15s;
+}
+.focus-card:active{opacity:.9;}
+.focus-lbl{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ac2);font-weight:700;margin-bottom:8px;}
+.focus-principle{font-size:.95rem;font-weight:700;color:var(--tx);margin-bottom:5px;line-height:1.35;}
+.focus-verse{font-family:var(--mono);font-size:.7rem;color:var(--tx3);margin-bottom:8px;}
+.focus-note{font-size:.82rem;color:var(--tx2);font-style:italic;line-height:1.55;}
+
+/* ============================================================
+   HEART FEED
+============================================================ */
+.hfrow{display:flex;gap:8px;margin-bottom:18px;}
+.hfbtn{
+  flex:1;padding:11px 6px;background:var(--surf);border:1px solid var(--bdr);
+  border-radius:var(--r);color:var(--tx3);font-size:.72rem;font-weight:700;
+  letter-spacing:.05em;text-align:center;cursor:pointer;transition:all .15s;
+}
+.hfbtn.fed{background:var(--grn2);border-color:var(--grn);color:#7ad4a0;}
+
+/* ============================================================
+   STATS STRIP
+============================================================ */
+.sstrip{display:flex;gap:8px;margin-bottom:18px;}
+.ssbox{
+  flex:1;background:var(--surf);border:1px solid var(--bdr);
+  border-radius:var(--r);padding:10px 6px;text-align:center;
+}
+.ssnum{display:block;font-family:var(--mono);font-size:1.6rem;color:var(--tx2);line-height:1;font-weight:700;}
+.ssnum.gold{color:var(--gold);}
+.sslbl{display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin-top:3px;font-weight:600;}
+
+/* ============================================================
+   CARDS & CHECK ITEMS
+============================================================ */
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:8px;}
+.crow{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+
+.ci{
+  display:flex;align-items:flex-start;gap:12px;padding:13px 0;
+  border-bottom:1px solid var(--bdr);cursor:pointer;user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.ci:last-child{border-bottom:none;}
+.cbox{
+  width:22px;height:22px;border:1.5px solid var(--bdr2);border-radius:3px;
+  background:var(--surf2);flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.cbox.done{background:var(--grn);border-color:var(--grn);}
+.cbox.done::after{content:'';display:block;width:5px;height:10px;border:2px solid #c4f0d0;border-top:none;border-left:none;transform:rotate(42deg) translateY(-1px);}
+.clbl{font-size:.92rem;font-weight:600;color:var(--tx);flex:1;line-height:1.35;}
+.clbl.struck{color:var(--tx3);text-decoration:line-through;font-weight:400;}
+.csub{font-size:.72rem;color:var(--tx3);margin-top:2px;line-height:1.4;}
+.cright{font-size:.68rem;color:var(--tx3);font-family:var(--mono);white-space:nowrap;margin-top:3px;}
+.ci.od{background:rgba(184,112,64,.08);border-radius:var(--r);padding:12px 10px;border-bottom:none;margin-bottom:3px;}
+.ci.od .clbl{color:var(--warm);}
+.ci.od .cright{color:var(--warm);}
+
+.solid-badge{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 10px;
+  background:var(--grn2);border:1px solid var(--grn);border-radius:10px;
+  font-size:.65rem;letter-spacing:.1em;color:#7ad4a0;text-transform:uppercase;font-weight:700;
+}
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:10px 16px;background:var(--surf);border:1px solid var(--bdr);
+  border-radius:var(--r);color:var(--tx2);font-size:.82rem;min-height:42px;
+  font-weight:500;transition:all .15s;
+}
+.btn:hover{background:var(--surf2);border-color:var(--bdr2);color:var(--tx);}
+.bsm{padding:6px 13px;font-size:.74rem;min-height:32px;}
+.bblk{width:100%;}
+.bpri{
+  background:var(--ac);border-color:var(--ac);color:#fff;
+  font-weight:700;font-size:.82rem;letter-spacing:.03em;
+}
+.bpri:hover{background:var(--ac2);border-color:var(--ac2);}
+.bdel{color:var(--warm);}
+.bdel:hover{border-color:var(--warm);}
+.bgrn{background:var(--grn2);border-color:var(--grn);color:#7ad4a0;}
+
+/* Bounce button */
+#bounce-trigger{
+  display:block;width:100%;padding:26px 20px;
+  background:linear-gradient(145deg,var(--surf3) 0%,var(--surf2) 100%);
+  border:1.5px solid var(--bdr2);border-radius:var(--r);
+  color:var(--ac2);font-size:1.15rem;font-weight:800;
+  letter-spacing:.22em;text-transform:uppercase;text-align:center;
+  cursor:pointer;transition:all .2s;margin-bottom:6px;
+}
+#bounce-trigger:active{background:var(--surf3);}
+.brule{font-size:.7rem;letter-spacing:.1em;color:var(--tx3);text-align:center;margin-bottom:26px;font-weight:600;}
+
+/* ============================================================
+   PERIMETER
+============================================================ */
+.pline{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--bdr);}
+.pline:last-child{border-bottom:none;}
+.pbox{
+  width:20px;height:20px;border:1.5px solid var(--bdr2);border-radius:50%;
+  background:var(--surf2);flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;transition:all .15s;
+}
+.pbox.held{background:var(--grn);border-color:var(--grn);}
+.pbox.held::after{content:'';display:block;width:5px;height:9px;border:2px solid #c4f0d0;border-top:none;border-left:none;transform:rotate(42deg) translateY(-1px);}
+.ptxt{font-size:.88rem;color:var(--tx);flex:1;line-height:1.4;cursor:pointer;font-weight:500;}
+.ptxt.held{color:var(--tx3);font-weight:400;}
+.pedit{padding:4px 8px;background:none;border:none;color:var(--tx3);font-size:.74rem;cursor:pointer;}
+.catgrp{margin-bottom:14px;}
+.cathead{font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3);font-weight:700;padding-bottom:6px;border-bottom:1px solid var(--bdr);}
+
+/* ============================================================
+   BOUNCE LOG
+============================================================ */
+.bent{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--bdr);}
+.bent:last-child{border-bottom:none;}
+.btime{font-family:var(--mono);font-size:.68rem;color:var(--tx3);white-space:nowrap;padding-top:1px;min-width:50px;}
+.bact{font-size:.88rem;color:var(--tx2);font-weight:500;}
+.bnote{font-size:.78rem;color:var(--tx3);margin-top:2px;}
+
+/* ============================================================
+   BROTHER
+============================================================ */
+.brohdr{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:16px;}
+.broname{font-size:1rem;font-weight:700;color:var(--tx);margin-bottom:4px;}
+.brosince{font-family:var(--mono);font-size:.72rem;color:var(--tx3);}
+.brosince.od{color:var(--warm);}
+.cie{padding:12px 0;border-bottom:1px solid var(--bdr);}
+.cie:last-child{border-bottom:none;}
+.cidate{font-family:var(--mono);font-size:.7rem;color:var(--tx3);margin-bottom:3px;}
+.cinotes{font-size:.88rem;color:var(--tx2);line-height:1.5;}
+
+/* ============================================================
+   JOURNAL
+============================================================ */
+.jtabs{display:flex;border-bottom:1px solid var(--bdr);margin-bottom:16px;}
+.jtab{flex:1;padding:10px 8px;background:none;border:none;color:var(--tx3);font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px;}
+.jtab.active{color:var(--ac2);border-bottom-color:var(--ac);}
+.jentry{padding:13px 0;border-bottom:1px solid var(--bdr);cursor:pointer;}
+.jentry:last-child{border-bottom:none;}
+.jentry-date{font-family:var(--mono);font-size:.68rem;color:var(--tx3);margin-bottom:4px;}
+.jentry-preview{font-size:.87rem;color:var(--tx2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.vtentry{padding:13px 0;border-bottom:1px solid var(--bdr);cursor:pointer;}
+.vtentry:last-child{border-bottom:none;}
+.vt-badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;font-weight:700;}
+.vt-badge.victory{background:var(--grn2);color:#7ad4a0;border:1px solid var(--grn);}
+.vt-badge.temptation{background:rgba(184,112,64,.15);color:#d4a060;border:1px solid var(--warm);}
+.vt-sit{font-size:.87rem;color:var(--tx2);line-height:1.4;font-weight:500;}
+.vt-lesson{font-size:.78rem;color:var(--tx3);margin-top:4px;font-style:italic;}
+
+/* ============================================================
+   SETTINGS SUB-TABS
+============================================================ */
+.stab-bar{display:flex;overflow-x:auto;border-bottom:1px solid var(--bdr);margin:-16px -16px 18px;padding:0 16px;scrollbar-width:none;}
+.stab-bar::-webkit-scrollbar{display:none;}
+.stab-btn{flex-shrink:0;padding:10px 14px;background:none;border:none;color:var(--tx3);font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px;white-space:nowrap;}
+.stab-btn.active{color:var(--ac2);border-bottom-color:var(--ac);}
+.stab-pane{display:none;}
+.stab-pane.active{display:block;}
+
+/* Stats */
+.streak-big{
+  text-align:center;padding:24px 20px;
+  background:linear-gradient(145deg,var(--surf2),var(--surf));
+  border:1px solid var(--bdr2);border-radius:var(--r);margin-bottom:14px;
+}
+.streak-num{font-family:var(--mono);font-size:3.8rem;color:var(--gold);display:block;line-height:1;font-weight:700;}
+.streak-lbl{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3);margin-top:6px;display:block;font-weight:700;}
+.streak-sub{font-size:.82rem;color:var(--tx2);margin-top:10px;font-style:italic;}
+.stat-row{display:flex;gap:8px;margin-bottom:14px;}
+.stat-mini{flex:1;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 8px;text-align:center;}
+.stat-mini .sn{font-family:var(--mono);font-size:1.5rem;color:var(--tx2);display:block;line-height:1;font-weight:700;}
+.stat-mini .sl{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin-top:4px;display:block;font-weight:600;}
+
+/* Heat map */
+.hmap-wrap{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:14px;}
+.hmap-lbl{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-bottom:12px;font-weight:700;}
+.hmap-grid{display:grid;grid-template-columns:repeat(13,1fr);gap:4px;}
+.hmap-col{display:flex;flex-direction:column;gap:4px;}
+.hmap-cell{aspect-ratio:1;border-radius:2px;background:var(--surf2);}
+.hmap-cell.solid{background:var(--ac);}
+.hmap-cell.partial{background:var(--ac);opacity:.3;}
+.hmap-cell.today{box-shadow:0 0 0 1.5px var(--gold);}
+.hmap-legend{display:flex;align-items:center;gap:14px;margin-top:10px;}
+.hleg{display:flex;align-items:center;gap:5px;font-size:.62rem;color:var(--tx3);font-weight:600;}
+.hleg-dot{width:10px;height:10px;border-radius:2px;}
+
+/* Settings rows */
+.setrow{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--bdr);gap:12px;}
+.setrow:last-child{border-bottom:none;}
+.setlbl{font-size:.9rem;font-weight:600;color:var(--tx);}
+.setmeta{font-size:.72rem;color:var(--tx3);margin-top:2px;font-family:var(--mono);}
+
+/* ============================================================
+   FORMS
+============================================================ */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);font-weight:700;margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);color:var(--tx);font-size:.9rem;padding:11px 12px;outline:none;-webkit-appearance:none;transition:border-color .15s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ac);}
+.field textarea{resize:vertical;min-height:100px;line-height:1.6;}
+.row2{display:flex;gap:10px;}.row2 .field{flex:1;}
+
+/* ============================================================
+   MODALS
+============================================================ */
+.mbg{display:none;position:fixed;inset:0;background:rgba(4,10,22,.85);z-index:400;align-items:flex-end;justify-content:center;}
+.mbg.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--bdr);border-bottom:none;border-radius:10px 10px 0 0;padding:24px 20px 44px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+.mttl{font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--tx3);font-weight:700;margin-bottom:20px;}
+.mact{display:flex;gap:8px;margin-top:18px;}
+.modal-full{background:var(--bg2);border:1px solid var(--bdr);border-bottom:none;border-radius:10px 10px 0 0;width:100%;max-width:480px;height:90vh;display:flex;flex-direction:column;}
+.mfull-head{padding:18px 20px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0;}
+.mfull-title{font-size:1rem;font-weight:700;color:var(--tx);flex:1;line-height:1.35;}
+.mfull-sub{font-size:.66rem;color:var(--tx3);margin-top:4px;letter-spacing:.06em;font-weight:600;}
+.mfull-close{background:none;border:none;color:var(--tx3);font-size:1.2rem;cursor:pointer;padding:0 0 0 8px;flex-shrink:0;line-height:1;}
+.mfull-body{flex:1;overflow-y:auto;padding:18px 20px 30px;}
+.mfull-foot{padding:14px 20px 22px;border-top:1px solid var(--bdr);flex-shrink:0;display:flex;gap:8px;}
+
+/* Bounce modal */
+.bmsg{font-size:.9rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--tx);margin-bottom:16px;}
+.trig-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.trig-btn{padding:6px 12px;background:var(--surf);border:1px solid var(--bdr);border-radius:10px;color:var(--tx3);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s;}
+.trig-btn.sel{background:var(--surf3);border-color:var(--bdr2);color:var(--tx);}
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.abtn{padding:14px 12px;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);color:var(--tx2);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;text-align:left;line-height:1.3;}
+.absub{font-size:.7rem;color:var(--tx3);margin-top:3px;display:block;font-weight:400;}
+.abtn.sel{border-color:var(--ac);color:var(--tx);background:var(--surf2);}
+.abtn.sel .absub{color:var(--tx2);}
+#timer-disp{text-align:center;font-family:var(--mono);font-size:2.8rem;font-weight:700;color:var(--tx2);letter-spacing:.12em;margin:14px 0 10px;}
+.trow{display:flex;gap:8px;justify-content:center;margin-bottom:16px;}
+
+/* Templates */
+.tmpl-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--bdr);cursor:pointer;}
+.tmpl-item:last-child{border-bottom:none;}
+.tmpl-add{width:22px;height:22px;border:1.5px solid var(--bdr2);border-radius:var(--r);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--tx3);}
+.tmpl-text{font-size:.87rem;color:var(--tx2);flex:1;line-height:1.4;}
+.tmpl-item.added .tmpl-add{background:var(--grn);border-color:var(--grn);color:#c4f0d0;font-size:.7rem;}
+
+/* Check-in questions */
+.ciq{padding:12px 0;border-bottom:1px solid var(--bdr);font-size:.87rem;color:var(--tx2);line-height:1.55;}
+.ciq:last-child{border-bottom:none;}
+.ciq::before{content:attr(data-n)'. ';color:var(--tx3);font-family:var(--mono);font-size:.78rem;}
+
+/* ============================================================
+   EMPTY STATES
+============================================================ */
+.empty{padding:34px 20px;text-align:center;}
+.empty-ttl{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);font-weight:700;margin-bottom:8px;}
+.empty-body{font-size:.83rem;color:var(--tx4);line-height:1.65;font-style:italic;}
+
+/* ============================================================
+   APP SHELL
+============================================================ */
+#app{display:none;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;}
+#app.visible{display:flex;}
+</style>
 </head>
 <body>
-    <!-- IMPORT SCREEN -->
-    <div id="importScreen" class="import-screen">
-        <div class="w-full max-w-sm">
-            <h1 class="bebas text-5xl mb-2 text-center orange">TACO LOOPER</h1>
-            <p class="text-center text-gray-400 text-sm mb-8">Audio looping for iPhone Voice Memos</p>
-            
-            <div class="drop-zone" id="dropZone">
-                <div class="text-4xl mb-4">🎙️</div>
-                <p class="text-lg font-semibold mb-2">Drag & Drop Audio File</p>
-                <p class="text-xs text-gray-400">or tap to select</p>
-            </div>
-            
-            <input type="file" id="fileInput" class="hidden-file-input" accept="audio/*">
-            
-            <div class="p-4 bg-gray-800 rounded-lg w-full max-w-sm">
-                <p class="text-xs text-gray-300 mb-2 font-semibold">How to import Voice Memos:</p>
-                <ol class="text-xs text-gray-400 space-y-1 list-decimal list-inside">
-                    <li>Open Voice Memos app</li>
-                    <li>Tap "..." on your memo</li>
-                    <li>Select "Share"</li>
-                    <li>Choose "Save to Files"</li>
-                    <li>Open in Safari, select here</li>
-                </ol>
-            </div>
-        </div>
+
+<!-- SETUP -->
+<div id="setup-screen" class="screen">
+  <div class="lkwrap">
+    <div class="lkbrand">Ledger</div>
+    <div class="lkbrand-sub">Every Man's Battle</div>
+    <div class="lkbrand-tag">Arterburn &amp; Stoeker — Daily Companion</div>
+    <div id="s1">
+      <span class="lklbl">Select mode</span>
+      <div class="mode-grid">
+        <div class="mcard" id="ms-single" onclick="pickSetupMode('single')">Single</div>
+        <div class="mcard" id="ms-married" onclick="pickSetupMode('married')">Married</div>
+      </div>
+      <button class="btn bpri bblk" onclick="goStep2()">Continue</button>
     </div>
-    
-    <!-- MAIN APP -->
-    <div id="mainApp" class="main-container">
-        <div style="height: env(safe-area-inset-top);"></div>
-        
-        <div class="p-4 pb-2 flex-shrink-0">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="bebas text-3xl orange">TACO LOOPER</h1>
-                <button class="btn-small" id="newFileBtn">+ NEW</button>
-            </div>
-            
-            <div class="text-xs text-gray-400 mono">
-                <p id="fileName" class="truncate"></p>
-                <p id="fileDuration" class="text-orange-500"></p>
-            </div>
-        </div>
-        
-        <!-- WAVEFORM -->
-        <div class="px-4 py-3 flex-shrink-0">
-            <div class="waveform-container">
-                <canvas id="waveCanvas" width="1024" height="1"></canvas>
-                <div class="handle" id="inHandle" style="left: 0%;"></div>
-                <div class="handle" id="outHandle" style="left: 100%;"></div>
-                <div class="playhead" id="playhead" style="left: 0%;"></div>
-            </div>
-        </div>
-        
-        <!-- TIME DISPLAY -->
-        <div class="px-4 py-2 flex-shrink-0">
-            <div class="flex justify-between items-center text-xs mono text-gray-400">
-                <span id="currentTime">00:00</span>
-                <span id="totalTime">00:00</span>
-                <span id="loopCount" class="orange-accent font-bold">Loop: 0</span>
-            </div>
-        </div>
-        
-        <!-- PLAY CONTROLS -->
-        <div class="px-4 py-4 flex-shrink-0">
-            <div class="flex justify-center mb-6">
-                <button class="btn-play" id="playBtn">▶</button>
-            </div>
-            
-            <div class="flex gap-2">
-                <button class="btn-small" id="loopToggle">LOOP OFF</button>
-                <button class="btn-small" id="resetBtn">RESET</button>
-            </div>
-        </div>
-        
-        <!-- SPEED CONTROL -->
-        <div class="px-4 py-4 border-t border-gray-700 flex-shrink-0">
-            <p class="text-xs text-gray-400 mb-2 mono">SPEED: <span id="speedDisplay" class="orange">1.00x</span></p>
-            <input type="range" id="speedSlider" min="0.25" max="2.5" step="0.01" value="1" class="mb-3">
-            <div class="grid grid-cols-6 gap-2">
-                <button class="btn-small text-xs" data-speed="0.5">0.5x</button>
-                <button class="btn-small text-xs" data-speed="0.75">0.75x</button>
-                <button class="btn-small text-xs active" data-speed="1">1.0x</button>
-                <button class="btn-small text-xs" data-speed="1.25">1.25x</button>
-                <button class="btn-small text-xs" data-speed="1.5">1.5x</button>
-                <button class="btn-small text-xs" data-speed="2">2.0x</button>
-            </div>
-        </div>
-        
-        <div style="height: env(safe-area-inset-bottom); flex-shrink: 0;"></div>
+    <div id="s2" style="display:none;">
+      <span class="lklbl">Create passcode</span>
+      <input type="password" id="sp1" placeholder="----" inputmode="numeric" maxlength="20">
+      <span class="lklbl">Confirm passcode</span>
+      <input type="password" id="sp2" placeholder="----" inputmode="numeric" maxlength="20">
+      <div class="lkerr" id="setup-err"></div>
+      <button class="btn bpri bblk" onclick="finishSetup()">Activate</button>
     </div>
-    
-    <script>
-        // ============ AUDIO STATE ============
-        let audioContext = null;
-        let audioBuffer = null;
-        let source = null;
-        let gainNode = null;
-        
-        let isPlaying = false;
-        let playbackRate = 1;
-        
-        let loopStart = 0;
-        let loopEnd = 0;
-        let loopEnabled = false;
-        let loopCount = 0;
-        
-        let startTime = 0;
-        let pausedTime = 0;
-        let lastScheduleCheck = 0;
-        
-        const UI = {
-            importScreen: document.getElementById('importScreen'),
-            mainApp: document.getElementById('mainApp'),
-            dropZone: document.getElementById('dropZone'),
-            fileInput: document.getElementById('fileInput'),
-            fileName: document.getElementById('fileName'),
-            fileDuration: document.getElementById('fileDuration'),
-            canvas: document.getElementById('waveCanvas'),
-            playBtn: document.getElementById('playBtn'),
-            loopToggle: document.getElementById('loopToggle'),
-            resetBtn: document.getElementById('resetBtn'),
-            speedSlider: document.getElementById('speedSlider'),
-            speedDisplay: document.getElementById('speedDisplay'),
-            currentTime: document.getElementById('currentTime'),
-            totalTime: document.getElementById('totalTime'),
-            loopCountDisplay: document.getElementById('loopCount'),
-            inHandle: document.getElementById('inHandle'),
-            outHandle: document.getElementById('outHandle'),
-            playhead: document.getElementById('playhead'),
-            newFileBtn: document.getElementById('newFileBtn'),
-            speedPresets: document.querySelectorAll('[data-speed]')
-        };
-        
-        // ============ AUDIO CONTEXT ============
-        function initAudioContext() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioContext.state === 'suspended') {
-                audioContext.resume().catch(() => {});
-            }
-        }
-        
-        // ============ FILE IMPORT ============
-        UI.dropZone.addEventListener('click', () => UI.fileInput.click());
-        
-        UI.dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            UI.dropZone.classList.add('dragover');
-        });
-        
-        UI.dropZone.addEventListener('dragleave', () => {
-            UI.dropZone.classList.remove('dragover');
-        });
-        
-        UI.dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            UI.dropZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) {
-                loadAudio(e.dataTransfer.files[0]);
-            }
-        });
-        
-        UI.fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                loadAudio(e.target.files[0]);
-            }
-        });
-        
-        function loadAudio(file) {
-            UI.fileName.textContent = file.name;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                initAudioContext();
-                audioContext.decodeAudioData(e.target.result, (buffer) => {
-                    audioBuffer = buffer;
-                    loopStart = 0;
-                    loopEnd = buffer.duration;
-                    loopCount = 0;
-                    pausedTime = 0;
-                    playbackRate = 1;
-                    
-                    UI.speedSlider.value = 1;
-                    UI.speedDisplay.textContent = '1.00x';
-                    UI.fileDuration.textContent = formatTime(buffer.duration);
-                    UI.totalTime.textContent = formatTime(buffer.duration);
-                    
-                    updateHandles();
-                    drawWaveform();
-                    
-                    UI.importScreen.style.display = 'none';
-                    UI.mainApp.classList.add('active');
-                });
-            };
-            reader.readAsArrayBuffer(file);
-        }
-        
-        // ============ WAVEFORM RENDERING ============
-        function drawWaveform() {
-            if (!audioBuffer) return;
-            
-            const canvas = UI.canvas;
-            const ctx = canvas.getContext('2d');
-            const containerWidth = canvas.parentElement.offsetWidth;
-            const devicePixelRatio = window.devicePixelRatio || 1;
-            
-            const width = containerWidth * devicePixelRatio;
-            const height = canvas.offsetHeight * devicePixelRatio;
-            
-            canvas.width = width;
-            canvas.height = height;
-            ctx.scale(devicePixelRatio, devicePixelRatio);
-            
-            const displayWidth = containerWidth;
-            const displayHeight = canvas.offsetHeight;
-            
-            // Background
-            ctx.fillStyle = '#1a1f26';
-            ctx.fillRect(0, 0, displayWidth, displayHeight);
-            
-            // Loop region dimming
-            const loopStartPx = (loopStart / audioBuffer.duration) * displayWidth;
-            const loopEndPx = (loopEnd / audioBuffer.duration) * displayWidth;
-            
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-            ctx.fillRect(0, 0, loopStartPx, displayHeight);
-            ctx.fillRect(loopEndPx, 0, displayWidth - loopEndPx, displayHeight);
-            
-            // Waveform
-            const data = audioBuffer.getChannelData(0);
-            const yCenter = displayHeight / 2;
-            const scale = displayHeight / 4;
-            
-            ctx.strokeStyle = '#E8763A';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            
-            for (let i = 0; i < displayWidth; i++) {
-                let sum = 0;
-                let count = 0;
-                const start = Math.floor((i / displayWidth) * data.length);
-                const end = Math.floor(((i + 1) / displayWidth) * data.length);
-                
-                for (let j = start; j < end; j++) {
-                    sum += Math.abs(data[j]);
-                    count++;
-                }
-                
-                const avg = count > 0 ? sum / count : 0;
-                const y = yCenter - (avg * scale);
-                
-                if (i === 0) {
-                    ctx.moveTo(i, y);
-                } else {
-                    ctx.lineTo(i, y);
-                }
-            }
-            
-            ctx.stroke();
-        }
-        
-        function updateHandles() {
-            if (!audioBuffer) return;
-            const duration = audioBuffer.duration;
-            
-            UI.inHandle.style.left = ((loopStart / duration) * 100) + '%';
-            UI.outHandle.style.left = ((loopEnd / duration) * 100) + '%';
-        }
-        
-        // ============ HANDLE DRAGGING ============
-        let draggingHandle = null;
-        
-        function getXFromEvent(e) {
-            const rect = UI.canvas.parentElement.getBoundingClientRect();
-            let x;
-            if (e.touches) {
-                x = e.touches[0].clientX - rect.left;
-            } else {
-                x = e.clientX - rect.left;
-            }
-            return Math.max(0, Math.min(x, rect.width));
-        }
-        
-        function handleDragStart(e, handle) {
-            e.preventDefault();
-            draggingHandle = handle;
-            document.addEventListener('mousemove', handleDragMove);
-            document.addEventListener('mouseup', handleDragEnd);
-            document.addEventListener('touchmove', handleDragMove, { passive: false });
-            document.addEventListener('touchend', handleDragEnd);
-        }
-        
-        function handleDragMove(e) {
-            if (!draggingHandle || !audioBuffer) return;
-            
-            const x = getXFromEvent(e);
-            const rect = UI.canvas.parentElement.getBoundingClientRect();
-            const time = (x / rect.width) * audioBuffer.duration;
-            
-            if (draggingHandle === 'in') {
-                loopStart = Math.max(0, Math.min(time, loopEnd - 0.01));
-            } else if (draggingHandle === 'out') {
-                loopEnd = Math.min(audioBuffer.duration, Math.max(time, loopStart + 0.01));
-            }
-            
-            updateHandles();
-            drawWaveform();
-        }
-        
-        function handleDragEnd() {
-            draggingHandle = null;
-            document.removeEventListener('mousemove', handleDragMove);
-            document.removeEventListener('mouseup', handleDragEnd);
-            document.removeEventListener('touchmove', handleDragMove);
-            document.removeEventListener('touchend', handleDragEnd);
-        }
-        
-        UI.inHandle.addEventListener('mousedown', (e) => handleDragStart(e, 'in'));
-        UI.inHandle.addEventListener('touchstart', (e) => handleDragStart(e, 'in'));
-        UI.outHandle.addEventListener('mousedown', (e) => handleDragStart(e, 'out'));
-        UI.outHandle.addEventListener('touchstart', (e) => handleDragStart(e, 'out'));
-        
-        // Canvas click to seek
-        UI.canvas.addEventListener('click', (e) => {
-            if (!audioBuffer || draggingHandle) return;
-            const rect = UI.canvas.parentElement.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const time = (x / rect.width) * audioBuffer.duration;
-            pausedTime = Math.max(loopStart, Math.min(time, loopEnd));
-            
-            if (isPlaying) {
-                startTime = audioContext.currentTime - pausedTime / playbackRate;
-            }
-        });
-        
-        // ============ PLAYBACK ============
-        function play() {
-            if (!audioBuffer) return;
-            
-            initAudioContext();
-            
-            if (isPlaying) {
-                pause();
-                return;
-            }
-            
-            isPlaying = true;
-            UI.playBtn.textContent = '⏸';
-            
-            // Create new source
-            if (source) {
-                try { source.stop(); } catch (e) {}
-                source = null;
-            }
-            
-            source = audioContext.createBufferSource();
-            source.buffer = audioBuffer;
-            source.playbackRate.value = playbackRate;
-            
-            gainNode = audioContext.createGain();
-            source.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            source.start(0, pausedTime);
-            startTime = audioContext.currentTime - pausedTime / playbackRate;
-            lastScheduleCheck = audioContext.currentTime;
-        }
-        
-        function pause() {
-            isPlaying = false;
-            UI.playBtn.textContent = '▶';
-            
-            if (source) {
-                try { source.stop(); } catch (e) {}
-                source = null;
-            }
-            
-            pausedTime = (audioContext.currentTime - startTime) * playbackRate;
-            pausedTime = Math.max(0, Math.min(pausedTime, audioBuffer.duration));
-        }
-        
-        function scheduleLoopRestart() {
-            if (!isPlaying || !audioBuffer) return;
-            
-            const now = audioContext.currentTime;
-            let currentPos = (now - startTime) * playbackRate;
-            
-            // Handle loop restart
-            if (loopEnabled && currentPos >= loopEnd) {
-                // Seamless restart
-                loopCount++;
-                UI.loopCountDisplay.textContent = `Loop: ${loopCount}`;
-                
-                pausedTime = loopStart;
-                
-                try { source.stop(); } catch (e) {}
-                
-                source = audioContext.createBufferSource();
-                source.buffer = audioBuffer;
-                source.playbackRate.value = playbackRate;
-                source.connect(gainNode);
-                source.start(0, loopStart);
-                
-                startTime = now - (loopStart / playbackRate);
-            } else if (!loopEnabled && currentPos >= audioBuffer.duration) {
-                pause();
-                pausedTime = audioBuffer.duration;
-            } else if (currentPos < loopStart) {
-                // Snap back into loop if somehow left it
-                pausedTime = loopStart;
-                startTime = now - (loopStart / playbackRate);
-            }
-        }
-        
-        // ============ UI UPDATES ============
-        function updatePlayhead() {
-            if (!audioBuffer) return;
-            
-            if (isPlaying) {
-                const now = audioContext.currentTime;
-                pausedTime = (now - startTime) * playbackRate;
-                pausedTime = Math.max(0, pausedTime);
-                
-                // Clamp to loop region when playing
-                if (loopEnabled && pausedTime > loopEnd) {
-                    scheduleLoopRestart();
-                    pausedTime = loopStart;
-                }
-            }
-            
-            const progress = Math.max(0, Math.min(pausedTime / audioBuffer.duration, 1));
-            UI.playhead.style.left = (progress * 100) + '%';
-            UI.currentTime.textContent = formatTime(pausedTime);
-        }
-        
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        }
-        
-        // ============ CONTROLS ============
-        UI.playBtn.addEventListener('click', play);
-        
-        UI.loopToggle.addEventListener('click', () => {
-            loopEnabled = !loopEnabled;
-            UI.loopToggle.textContent = loopEnabled ? 'LOOP ON' : 'LOOP OFF';
-            UI.loopToggle.classList.toggle('active');
-        });
-        
-        UI.resetBtn.addEventListener('click', () => {
-            pause();
-            pausedTime = 0;
-            loopCount = 0;
-            UI.loopCountDisplay.textContent = 'Loop: 0';
-            updatePlayhead();
-        });
-        
-        UI.speedSlider.addEventListener('input', (e) => {
-            playbackRate = parseFloat(e.target.value);
-            UI.speedDisplay.textContent = playbackRate.toFixed(2) + 'x';
-            
-            if (source && isPlaying) {
-                source.playbackRate.value = playbackRate;
-            }
-            
-            UI.speedPresets.forEach(btn => {
-                const btnSpeed = parseFloat(btn.dataset.speed);
-                if (Math.abs(btnSpeed - playbackRate) < 0.01) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        });
-        
-        UI.speedPresets.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const speed = parseFloat(btn.dataset.speed);
-                playbackRate = speed;
-                UI.speedSlider.value = speed;
-                UI.speedDisplay.textContent = speed.toFixed(2) + 'x';
-                
-                if (source && isPlaying) {
-                    source.playbackRate.value = playbackRate;
-                }
-                
-                UI.speedPresets.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
-        
-        UI.newFileBtn.addEventListener('click', () => {
-            pause();
-            audioBuffer = null;
-            source = null;
-            loopCount = 0;
-            UI.mainApp.classList.remove('active');
-            UI.importScreen.style.display = 'flex';
-            UI.fileInput.value = '';
-        });
-        
-        // ============ ANIMATION LOOP ============
-        function animationLoop() {
-            scheduleLoopRestart();
-            updatePlayhead();
-            requestAnimationFrame(animationLoop);
-        }
-        
-        animationLoop();
-        
-        // Prevent accidental zoom on iOS
-        document.addEventListener('touchmove', (e) => {
-            if (e.scale !== 1) e.preventDefault();
-        }, { passive: false });
-    </script>
+  </div>
+</div>
+
+<!-- LOCK -->
+<div id="lock-screen" class="screen">
+  <div class="lkwrap">
+    <div class="lkbrand">Ledger</div>
+    <div class="lkbrand-sub">Every Man's Battle</div>
+    <div class="lkbrand-tag" id="lock-date-sub"></div>
+    <span class="lklbl">Passcode</span>
+    <input type="password" id="lock-pass" placeholder="----" inputmode="numeric" maxlength="20"
+           onkeydown="if(event.key==='Enter')doUnlock()">
+    <div class="lkerr" id="lock-err"></div>
+    <button class="btn bpri bblk" onclick="doUnlock()">Enter</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div id="topbar">
+    <div>
+      <div class="top-brand">Ledger</div>
+      <div class="top-brand-sub">Every Man's Battle</div>
+    </div>
+    <div class="top-right">
+      <span class="top-streak" id="top-streak"></span>
+      <span class="top-date" id="topbar-date"></span>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- MANUAL — default active view -->
+    <div class="view active" id="view-manual">
+      <div class="manual-hero">
+        <div class="mhero-eyebrow">Battle Companion</div>
+        <div class="mhero-title">Every Man's Battle</div>
+        <div class="mhero-authors">Stephen Arterburn &amp; Fred Stoeker with Mike Yorkey</div>
+        <div class="mhero-body">Winning the war on sexual temptation one victory at a time. This manual covers the complete framework: Eyes, Mind, Heart, the Bounce, the Perimeter, Accountability, and Marriage.</div>
+      </div>
+      <div class="manual-prog">
+        <div class="prog-bar"><div class="prog-fill" id="manual-prog-fill" style="width:0%"></div></div>
+        <span class="prog-lbl" id="manual-prog-lbl">0 / 0 read</span>
+      </div>
+      <div class="mfrow">
+        <button class="mfbtn active" onclick="setManualFilter('all',this)">All</button>
+        <button class="mfbtn" onclick="setManualFilter('bookmarks',this)">Bookmarked</button>
+        <button class="mfbtn" onclick="setManualFilter('unread',this)">Unread</button>
+      </div>
+      <div id="manual-list"></div>
+    </div>
+
+    <!-- TODAY -->
+    <div class="view" id="view-today">
+      <div class="focus-card" id="focus-card" onclick="openFocusSection()">
+        <div class="focus-lbl">Today's Focus</div>
+        <div class="focus-principle" id="focus-principle">—</div>
+        <div class="focus-verse" id="focus-verse">—</div>
+        <div class="focus-note" id="focus-note"></div>
+      </div>
+      <div class="sstrip">
+        <div class="ssbox"><span class="ssnum gold" id="ss-streak">0</span><span class="sslbl">Day streak</span></div>
+        <div class="ssbox"><span class="ssnum" id="ss-bounces">0</span><span class="sslbl">Bounces today</span></div>
+        <div class="ssbox"><span class="ssnum" id="ss-solid">0</span><span class="sslbl">Solid days</span></div>
+      </div>
+      <div class="sec">
+        <div class="shead"><span class="slbl">Heart feed</span></div>
+        <div class="hfrow">
+          <div class="hfbtn" id="hf-prayer" onclick="toggleHeartFeed('prayer')">Prayer</div>
+          <div class="hfbtn" id="hf-scripture" onclick="toggleHeartFeed('scripture')">Scripture</div>
+          <div class="hfbtn" id="hf-worship" onclick="toggleHeartFeed('worship')">Worship</div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="shead">
+          <span class="slbl">Three fronts</span>
+          <span id="solid-badge-wrap"></span>
+        </div>
+        <div class="card" id="fronts-list"></div>
+      </div>
+      <div class="sec">
+        <div class="shead">
+          <span class="slbl">Tasks due</span>
+          <button class="btn bsm" onclick="openAddTask()">+ Add</button>
+        </div>
+        <div id="today-tasks"></div>
+      </div>
+    </div>
+
+    <!-- BOUNCE -->
+    <div class="view" id="view-bounce">
+      <button id="bounce-trigger" onclick="openBounceModal()">BOUNCE</button>
+      <div class="brule">Two-second rule. Pre-decided. Every time.</div>
+      <div class="sec">
+        <div class="shead"><span class="slbl">Today's bounces</span></div>
+        <div id="bounce-log-list"></div>
+      </div>
+    </div>
+
+    <!-- JOURNAL -->
+    <div class="view" id="view-journal">
+      <div class="jtabs">
+        <button class="jtab active" onclick="switchJTab('daily',this)">Daily</button>
+        <button class="jtab" onclick="switchJTab('vt',this)">Battle Log</button>
+      </div>
+      <div id="jcontent-daily">
+        <div style="text-align:right;margin-bottom:14px;">
+          <button class="btn bsm" onclick="openJournalEntry(null)">+ New entry</button>
+        </div>
+        <div id="journal-list"></div>
+      </div>
+      <div id="jcontent-vt" style="display:none;">
+        <div style="text-align:right;margin-bottom:14px;">
+          <button class="btn bsm" onclick="openVTEntry(null)">+ Log entry</button>
+        </div>
+        <div id="vt-list"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="view" id="view-settings">
+      <div class="stab-bar">
+        <button class="stab-btn active" onclick="switchStab('stats',this)">Stats</button>
+        <button class="stab-btn" onclick="switchStab('perimeter',this)">Perimeter</button>
+        <button class="stab-btn" onclick="switchStab('brother',this)">Brother</button>
+        <button class="stab-btn" onclick="switchStab('prefs',this)">Prefs</button>
+        <button class="stab-btn" onclick="switchStab('data',this)">Data</button>
+      </div>
+      <div class="stab-pane active" id="stab-stats">
+        <div class="streak-big">
+          <span class="streak-num" id="stat-streak">0</span>
+          <span class="streak-lbl">Current streak</span>
+          <div class="streak-sub" id="streak-msg"></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-mini"><span class="sn" id="stat-longest">0</span><span class="sl">Longest</span></div>
+          <div class="stat-mini"><span class="sn" id="stat-solid-total">0</span><span class="sl">Solid days</span></div>
+          <div class="stat-mini"><span class="sn" id="stat-bounces-total">0</span><span class="sl">Bounces</span></div>
+        </div>
+        <div class="hmap-wrap">
+          <div class="hmap-lbl">Last 13 weeks</div>
+          <div class="hmap-grid" id="heat-map"></div>
+          <div class="hmap-legend">
+            <div class="hleg"><div class="hleg-dot" style="background:var(--surf2);"></div>None</div>
+            <div class="hleg"><div class="hleg-dot" style="background:var(--ac);opacity:.3;"></div>Partial</div>
+            <div class="hleg"><div class="hleg-dot" style="background:var(--ac);"></div>Solid</div>
+          </div>
+        </div>
+        <div class="card" id="monthly-summary"></div>
+      </div>
+      <div class="stab-pane" id="stab-perimeter">
+        <div class="shead">
+          <span class="slbl">Your lines</span>
+          <div style="display:flex;gap:6px;">
+            <button class="btn bsm" onclick="openTemplates()">Templates</button>
+            <button class="btn bsm" onclick="openAddLine()">+ Add</button>
+          </div>
+        </div>
+        <div id="perimeter-list"></div>
+      </div>
+      <div class="stab-pane" id="stab-brother">
+        <div id="bro-header-block"></div>
+        <div class="shead">
+          <span class="slbl">Check-in log</span>
+          <div style="display:flex;gap:6px;">
+            <button class="btn bsm" onclick="openCheckinQuestions()">Questions</button>
+            <button class="btn bsm" onclick="openLogCheckin()">+ Log</button>
+          </div>
+        </div>
+        <div id="checkin-list"></div>
+      </div>
+      <div class="stab-pane" id="stab-prefs">
+        <div class="card" style="padding:0 14px;">
+          <div class="setrow">
+            <div><div class="setlbl">Mode</div><div class="setmeta" id="mode-display">—</div></div>
+            <button class="btn bsm" onclick="openChangeMode()">Change</button>
+          </div>
+          <div class="setrow">
+            <div><div class="setlbl">Passcode</div><div class="setmeta">Change login passcode</div></div>
+            <button class="btn bsm" onclick="openChangePass()">Change</button>
+          </div>
+          <div class="setrow">
+            <div><div class="setlbl">Accountability partner</div><div class="setmeta" id="bro-name-display">Not set</div></div>
+            <button class="btn bsm" onclick="openEditBrother()">Edit</button>
+          </div>
+        </div>
+      </div>
+      <div class="stab-pane" id="stab-data">
+        <div class="card" style="padding:0 14px;margin-bottom:12px;">
+          <div class="setrow">
+            <div><div class="setlbl">Export</div><div class="setmeta">Download JSON backup</div></div>
+            <button class="btn bsm" onclick="doExport()">Export</button>
+          </div>
+          <div class="setrow">
+            <div><div class="setlbl">Import</div><div class="setmeta">Restore from JSON</div></div>
+            <button class="btn bsm" onclick="openImport()">Import</button>
+          </div>
+          <div class="setrow">
+            <div><div class="setlbl">Clear all data</div><div class="setmeta">Erase and reset</div></div>
+            <button class="btn bsm bdel" onclick="doClear()">Clear</button>
+          </div>
+        </div>
+        <p style="font-size:.72rem;color:var(--tx3);line-height:1.6;">All data stored locally on your device. Nothing leaves your browser. Export regularly — clearing browser data will erase everything permanently.</p>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- NAV — Manual first -->
+  <nav id="navbar">
+    <button class="nb active" onclick="switchView('manual',this)"><span class="nb-dot"></span>Manual</button>
+    <button class="nb" onclick="switchView('today',this)"><span class="nb-dot"></span>Today</button>
+    <button class="nb" onclick="switchView('bounce',this)"><span class="nb-dot"></span>Bounce</button>
+    <button class="nb" onclick="switchView('journal',this)"><span class="nb-dot"></span>Journal</button>
+    <button class="nb" onclick="switchView('settings',this)"><span class="nb-dot"></span>Settings</button>
+  </nav>
+
+  <div class="disc">
+    All data is stored locally and protected by a basic passcode only.
+    Clearing browser data will erase everything. Export regularly. Not a substitute for professional guidance.
+  </div>
+</div>
+
+<!-- MODALS -->
+
+<div class="mbg" id="modal-bounce">
+  <div class="modal">
+    <div class="bmsg">Bounce. Next move.</div>
+    <div class="shead" style="margin-bottom:8px;"><span class="slbl">Trigger</span></div>
+    <div class="trig-row" id="trigger-row"></div>
+    <div class="shead" style="margin-bottom:8px;"><span class="slbl">Action</span></div>
+    <div class="agrid" id="bounce-action-grid"></div>
+    <div id="timer-disp" style="display:none;">05:00</div>
+    <div class="trow">
+      <button class="btn bsm" onclick="startTimer(5)">5 min</button>
+      <button class="btn bsm" onclick="startTimer(10)">10 min</button>
+      <button class="btn bsm" id="timer-stop-btn" style="display:none;" onclick="stopTimer()">Stop</button>
+    </div>
+    <div class="field"><label>Note (optional)</label><input type="text" id="bounce-note-input" placeholder="Quick note..."></div>
+    <div class="mact">
+      <button class="btn" style="flex:1;" onclick="closeModal('modal-bounce')">Cancel</button>
+      <button class="btn bpri" style="flex:2;" onclick="logBounce()">Log &amp; Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-task">
+  <div class="modal">
+    <div class="mttl" id="task-mttl">New task</div>
+    <div class="field"><label>Task name</label><input type="text" id="task-name" placeholder="e.g. Morning routine"></div>
+    <div class="row2">
+      <div class="field">
+        <label>Frequency</label>
+        <select id="task-freq" onchange="onFreqChange()">
+          <option value="daily">Daily</option>
+          <option value="every_x">Every X days</option>
+          <option value="weekly">Weekly</option>
+        </select>
+      </div>
+      <div class="field" id="xdays-field" style="display:none;">
+        <label>Days</label><input type="number" id="task-xdays" value="3" min="2" max="365">
+      </div>
+    </div>
+    <div class="field" id="dow-field" style="display:none;">
+      <label>Day of week</label>
+      <select id="task-dow">
+        <option value="0">Sunday</option><option value="1">Monday</option>
+        <option value="2">Tuesday</option><option value="3">Wednesday</option>
+        <option value="4">Thursday</option><option value="5">Friday</option>
+        <option value="6">Saturday</option>
+      </select>
+    </div>
+    <div class="mact">
+      <button class="btn" style="flex:1;" onclick="closeModal('modal-task')">Cancel</button>
+      <button class="btn bpri" style="flex:2;" onclick="saveTask()">Save</button>
+    </div>
+    <div id="task-del-wrap" style="margin-top:10px;display:none;">
+      <button class="btn bblk bdel" onclick="deleteTask()">Delete task</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-line">
+  <div class="modal">
+    <div class="mttl" id="line-mttl">New line</div>
+    <div class="field">
+      <label>Category</label>
+      <select id="line-cat">
+        <option value="eyes">Eyes</option><option value="mind">Mind</option>
+        <option value="digital">Digital</option><option value="marriage">Marriage</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="field"><label>The line</label><input type="text" id="line-text" placeholder="Be specific — vague lines don't hold"></div>
+    <div class="mact">
+      <button class="btn" style="flex:1;" onclick="closeModal('modal-line')">Cancel</button>
+      <button class="btn bpri" style="flex:2;" onclick="saveLine()">Save</button>
+    </div>
+    <div id="line-del-wrap" style="margin-top:10px;display:none;">
+      <button class="btn bblk bdel" onclick="deleteLine()">Delete line</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-templates">
+  <div class="modal">
+    <div class="mttl">Perimeter templates</div>
+    <div class="field">
+      <label>Category</label>
+      <select id="tmpl-cat" onchange="renderTemplateList()">
+        <option value="eyes">Eyes</option><option value="mind">Mind</option>
+        <option value="digital">Digital</option><option value="marriage">Marriage</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div id="tmpl-list"></div>
+    <div class="mact"><button class="btn bblk" onclick="closeModal('modal-templates')">Done</button></div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-checkin">
+  <div class="modal">
+    <div class="mttl">Log check-in</div>
+    <div class="field"><label>Date</label><input type="date" id="ci-date"></div>
+    <div class="field"><label>Notes</label><textarea id="ci-notes" placeholder="What was covered..."></textarea></div>
+    <div class="mact">
+      <button class="btn" style="flex:1;" onclick="closeModal('modal-checkin')">Cancel</button>
+      <button class="btn bpri" style="flex:2;" onclick="saveCheckin()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-questions">
+  <div class="modal">
+    <div class="mttl">Accountability questions</div>
+    <p style="font-size:.78rem;color:var(--tx3);margin-bottom:16px;line-height:1.6;">From Arterburn &amp; Stoeker. Ask them. Answer honestly.</p>
+    <div id="ciq-list"></div>
+    <div class="mact"><button class="btn bblk" onclick="closeModal('modal-questions')">Close</button></div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-brother">
+  <div class="modal">
+    <div class="mttl">Accountability partner</div>
+    <div class="field"><label>Name</label><input type="text" id="bro-name" placeholder="First name"></div>
+    <div class="field"><label>Contact / phone (optional)</label><input type="tel" id="bro-phone" placeholder="Optional"></div>
+    <div class="mact">
+      <button class="btn" style="flex:1;" onclick="closeModal('modal-brother')">Cancel</button>
+      <button class="btn bpri" style="flex:2;" onclick="saveBrother()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-pass">
+  <div class="modal">
+    <div class="mttl">Change passcode</div>
+    <div class="field"><label>Current</label><input type="password" id="cp-cur" inputmode="numeric"></div>
+    <div class="field"><label>New</label><input type="password" id="cp-new" inputmode="numeric"></div>
+    <div class="field"><label>Confirm new</label><input type="password" id="cp-con" inputmode="numeric"></div>
+    <div class="lkerr" id="cp-err"></div>
+    <div class="mact">
+      <button class="btn" style="flex:1;" onclick="closeModal('modal-pass')">Cancel</button>
+      <button class="btn bpri" style="flex:2;" onclick="savePass()">Update</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-mode">
+  <div class="modal">
+    <div class="mttl">Switch mode</div>
+    <div class="mode-grid" style="margin-bottom:18px;">
+      <div class="mcard" id="cm-single" onclick="pickChangeMode('single')">Single</div>
+      <div class="mcard" id="cm-married" onclick="pickChangeMode('married')">Married</div>
+    </div>
+    <div class="mact">
+      <button class="btn" style="flex:1;" onclick="closeModal('modal-mode')">Cancel</button>
+      <button class="btn bpri" style="flex:2;" onclick="saveMode()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-import">
+  <div class="modal">
+    <div class="mttl">Import data</div>
+    <p style="font-size:.78rem;color:var(--tx3);margin-bottom:16px;">Overwrites all current data. Confirm passcode first.</p>
+    <div class="field"><label>Passcode</label><input type="password" id="imp-pass" inputmode="numeric"></div>
+    <div class="field"><label>JSON</label><textarea id="imp-json" style="font-family:var(--mono);font-size:.72rem;" placeholder="Paste exported JSON..."></textarea></div>
+    <div class="lkerr" id="imp-err"></div>
+    <div class="mact">
+      <button class="btn" style="flex:1;" onclick="closeModal('modal-import')">Cancel</button>
+      <button class="btn bpri" style="flex:2;" onclick="doImport()">Import</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-journal">
+  <div class="modal">
+    <div class="mttl" id="jrnl-mttl">New entry</div>
+    <div class="field"><label>Date</label><input type="date" id="jrnl-date"></div>
+    <div class="field"><label>Entry</label><textarea id="jrnl-text" style="min-height:130px;" placeholder="Write honestly. This is private."></textarea></div>
+    <div id="jrnl-prompts" style="display:none;margin-bottom:14px;">
+      <div style="font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);font-weight:700;margin-bottom:8px;">Guided prompts</div>
+      <div id="jrnl-prompt-list"></div>
+    </div>
+    <div class="mact">
+      <button class="btn" style="flex:1;" onclick="closeModal('modal-journal')">Cancel</button>
+      <button class="btn bpri" style="flex:2;" onclick="saveJournalEntry()">Save</button>
+    </div>
+    <div id="jrnl-del-wrap" style="margin-top:10px;display:none;">
+      <button class="btn bblk bdel" onclick="deleteJournalEntry()">Delete entry</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-vt">
+  <div class="modal">
+    <div class="mttl" id="vt-mttl">Battle log entry</div>
+    <div class="row2">
+      <div class="field"><label>Type</label><select id="vt-type"><option value="victory">Victory</option><option value="temptation">Temptation</option></select></div>
+      <div class="field"><label>Date</label><input type="date" id="vt-date"></div>
+    </div>
+    <div class="field"><label>Situation</label><input type="text" id="vt-sit" placeholder="What happened?"></div>
+    <div class="field"><label>Trigger</label><input type="text" id="vt-trig" placeholder="What led to it?"></div>
+    <div class="field"><label>Response / action taken</label><input type="text" id="vt-resp" placeholder="What did you do?"></div>
+    <div class="field"><label>Lesson learned</label><textarea id="vt-lesson" style="min-height:70px;" placeholder="What does this tell you?"></textarea></div>
+    <div class="mact">
+      <button class="btn" style="flex:1;" onclick="closeModal('modal-vt')">Cancel</button>
+      <button class="btn bpri" style="flex:2;" onclick="saveVTEntry()">Save</button>
+    </div>
+    <div id="vt-del-wrap" style="margin-top:10px;display:none;">
+      <button class="btn bblk bdel" onclick="deleteVTEntry()">Delete entry</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-section">
+  <div class="modal-full">
+    <div class="mfull-head">
+      <div>
+        <div class="mfull-title" id="msec-title">—</div>
+        <div class="mfull-sub" id="msec-sub">—</div>
+      </div>
+      <button class="mfull-close" onclick="closeModal('modal-section')">&#10005;</button>
+    </div>
+    <div class="mfull-body" id="msec-body"></div>
+    <div class="mfull-foot">
+      <button class="btn bsm" id="msec-bm-btn" onclick="toggleSectionBookmark()" style="flex:1;">Bookmark</button>
+      <button class="btn bsm bgrn" id="msec-read-btn" onclick="markSectionRead()" style="flex:2;">Mark as read</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MANUAL=[
+  {id:'ch1',title:'Foundations',ch:'Ch. 1',color:'#4a90d9',sections:[
+    {id:'ch1-s1',title:'The Battle Is Real',quote:'Every man faces a battle no one else can see — and most men fight it entirely alone.',quoteBy:'Arterburn & Stoeker',
+     body:'Sexual temptation is not a character flaw unique to weak men. It is a universal battle waged against every man in every season of life. The enemy exploits a hardwired male visual response that God designed for good but sin has weaponized. Acknowledging the battle is not weakness — it is the first act of honest warfare.',
+     keyPoints:['Every man faces this battle — you are not uniquely broken.','Silence and secrecy are the enemy\'s greatest weapons.','Victory begins with honesty — with God, yourself, and at least one other man.'],
+     scriptures:[{ref:'1 Corinthians 6:18-20',text:'Flee from sexual immorality. Every other sin a person commits is outside the body, but the sexually immoral person sins against his own body.'},{ref:'1 Peter 5:8',text:'Be sober-minded; be watchful. Your adversary the devil prowls around like a roaring lion, seeking someone to devour.'}],
+     reflection:['When did you first realize this battle was yours to fight?','Who in your life knows the real scope of your struggle?','What has staying silent cost you?']},
+    {id:'ch1-s2',title:'The Enemy\'s Strategy',quote:'He doesn\'t need you to fall completely. He just needs you to look a little longer than you should.',quoteBy:'Fred Stoeker',
+     body:'Temptation follows a predictable path: Eyes to Mind to Heart to Action. The enemy doesn\'t announce himself. He uses ordinary moments — a billboard, a screen, a passing glance — to gain access. The progression from innocent input to compromise is rarely dramatic. It is usually slow, incremental, and disguised as something harmless.',
+     keyPoints:['The path always starts at the eyes.','Each compromise makes the next one easier.','"Just this once" is a lie that has never been true.'],
+     scriptures:[{ref:'James 1:14-15',text:'Each person is tempted when he is lured and enticed by his own desire. Then desire when it has conceived gives birth to sin.'},{ref:'Matthew 5:28',text:'Everyone who looks at a woman with lustful intent has already committed adultery with her in his heart.'}],
+     reflection:['What are your most predictable entry points?','What small compromises have become highways?','Where does your personal progression typically start?']},
+    {id:'ch1-s3',title:'The Path to Freedom',quote:'You don\'t need more willpower. You need a trained reflex and a transformed heart.',quoteBy:'Arterburn & Stoeker',
+     body:'Freedom isn\'t achieved through trying harder. It comes through building new reflexes, establishing pre-committed boundaries, cultivating a heart that genuinely wants purity, and being honest with at least one other man. Behavior modification without heart transformation produces a man who is outwardly clean but internally starving.',
+     keyPoints:['Willpower alone is not a sustainable strategy.','Trained reflexes replace willpower at the point of contact.','Heart transformation — feeding the spirit — sustains long-term freedom.'],
+     scriptures:[{ref:'Romans 12:2',text:'Do not be conformed to this world, but be transformed by the renewal of your mind.'},{ref:'Psalm 119:9-11',text:'How can a young man keep his way pure? By guarding it according to your word. I have stored up your word in my heart, that I might not sin against you.'}],
+     reflection:['Have you been relying on willpower alone?','What does heart transformation look like practically for you?','What is one trained reflex you could build this week?']}
+  ]},
+  {id:'ch2',title:'The Three Fronts',ch:'Ch. 2',color:'#3a8a5a',sections:[
+    {id:'ch2-s1',title:'Eyes — The First Front',quote:'The battle is won or lost in the first two seconds. Lose it at the eyes, and you\'ll fight it everywhere else.',quoteBy:'Fred Stoeker',
+     body:'The eyes are the primary entry point for sexual temptation in men. The Bounce is not about becoming blind. It is about training a reflex: when your eyes land on something that could lead you toward sin, they move. Immediately. Before the mind engages. Every time.',
+     keyPoints:['The Two-Second Rule: if you have not bounced in two seconds, you lost the first skirmish.','"Just one more look" is never innocent — it is a step down the progression.','Guard your environment: know your trigger zones and plan ahead.'],
+     tactics:['Bounce immediately — physical eye movement, not just internal resolve.','Pre-plan your escape route for known trigger locations.','Log every bounce. Build the pattern.'],
+     scriptures:[{ref:'Job 31:1',text:'I have made a covenant with my eyes; how then could I gaze at a virgin?'},{ref:'Psalm 101:3',text:'I will not set before my eyes anything that is worthless.'},{ref:'Matthew 5:29',text:'If your right eye causes you to sin, tear it out and throw it away.'}],
+     reflection:['What are your hardest trigger situations right now?','Are you bouncing or just "trying not to look"?','What one environmental change would remove a major trigger?']},
+    {id:'ch2-s2',title:'Mind — The Second Front',quote:'You cannot always control what enters your mind. You can control whether you invite it to stay.',quoteBy:'Arterburn & Stoeker',
+     body:'The mind is the processing center for what the eyes allowed in. Stoeker calls it the mental thoroughfare — a road that can either be kept clear or become a busy highway for corrupt traffic. The moment you begin to dwell on a thought, you have invited it from the street into your house.',
+     keyPoints:['Mental adultery is real — Jesus said so in Matthew 5:28.','Dwelling on a thought is a choice, not an inevitability.','The mind cannot be emptied — it must be filled with something better.'],
+     tactics:['The moment a wrong thought appears: name it, reject it, replace it.','Have a prepared redirection: a verse, a prayer, a physical action.','Do not negotiate with the thought — close the door immediately.'],
+     scriptures:[{ref:'2 Corinthians 10:5',text:'We destroy arguments and every lofty opinion raised against the knowledge of God, and take every thought captive to obey Christ.'},{ref:'Philippians 4:8',text:'Whatever is true, whatever is honorable, whatever is just, whatever is pure — think about these things.'}],
+     reflection:['What thoughts do you negotiate with instead of reject?','What is your go-to replacement thought or verse?','How long does it take before you close the mental door?']},
+    {id:'ch2-s3',title:'Heart — The Third Front',quote:'A man who starves his spirit will eventually feed his flesh. It\'s not a question of if — it\'s when.',quoteBy:'Fred Stoeker',
+     body:'The heart is the deepest front and the most neglected. What you feed grows. A man who consistently starves his spirit of Scripture, prayer, worship, and brotherhood is not standing still — he is losing ground. The heart must be actively cultivated to sustain long-term freedom.',
+     keyPoints:['Spiritual disciplines are not religious performance — they are supply lines.','You cannot fight a spiritual battle on empty.','The question is not whether you will feed something. The question is what.'],
+     tactics:['Morning Scripture intake — even five minutes opens the supply line.','Prayer that is honest, not performed.','Brotherhood — isolation is a loss before the temptation even arrives.'],
+     scriptures:[{ref:'Proverbs 4:23',text:'Keep your heart with all vigilance, for from it flow the springs of life.'},{ref:'Galatians 5:16',text:'Walk by the Spirit, and you will not gratify the desires of the flesh.'}],
+     reflection:['When did you last intentionally feed your heart?','What is crowding out your spiritual disciplines?','What supply line can you reopen this week?']}
+  ]},
+  {id:'ch3',title:'The Perimeter',ch:'Ch. 3',color:'#c8a040',sections:[
+    {id:'ch3-s1',title:'Why a Perimeter?',quote:'You don\'t decide in the moment. You decide before. That\'s what a perimeter is.',quoteBy:'Fred Stoeker',
+     body:'Willpower at the moment of temptation is weak. It is depleted by stress, fatigue, isolation, and time. A perimeter removes willpower from the equation by making the decision in advance, when you are clear-headed and close to God. A perimeter is a set of pre-committed choices that define where you will not go — before you are ever asked.',
+     keyPoints:['Pre-decided beats willpower-in-the-moment. Every time.','A perimeter that is vague is a perimeter that will not hold.','It should be specific enough to be slightly uncomfortable. That means it\'s working.'],
+     scriptures:[{ref:'Proverbs 4:14-15',text:'Do not enter the path of the wicked. Avoid it; do not go on it; turn away from it.'},{ref:'Job 31:1',text:'I have made a covenant with my eyes.'}],
+     reflection:['What decisions are you still making in the moment?','What line have you crossed repeatedly because you never pre-decided not to?','What would a perimeter strong enough to hold look like?']},
+    {id:'ch3-s2',title:'Building Your Perimeter',quote:'A man with no perimeter is a man with no defense.',quoteBy:'Arterburn & Stoeker',
+     body:'Effective perimeters are specific, concrete, and non-negotiable. "I won\'t look at bad stuff online" is a wish. "I will not use the internet alone after 9pm, and accountability software is always active" is a perimeter. Build lines for your eyes, mind, digital life, marriage, and accountability. Review them regularly.',
+     keyPoints:['Specific beats vague. Always.','Review after any breach — strengthen the line, don\'t just recommit.','Your perimeter will need to evolve as your life changes.'],
+     scriptures:[{ref:'1 Corinthians 9:27',text:'I discipline my body and keep it under control, lest after preaching to others I myself should be disqualified.'}],
+     reflection:['Where are your current lines too vague?','Where has your perimeter failed in the last 30 days?','What specific line would close the biggest gap?']}
+  ]},
+  {id:'ch4',title:'The Bounce',ch:'Ch. 4',color:'#8a5ad4',sections:[
+    {id:'ch4-s1',title:'The Bounce Principle',quote:'The Bounce is a trained reflex, not a willpower decision. Train it until it happens before you think.',quoteBy:'Fred Stoeker',
+     body:'When your eyes land on something that could lead to sin, they immediately move elsewhere. Not after a second look. Not after a decision process. Immediately. The goal is to train this response so deeply that it becomes automatic — a reflex, not a choice.',
+     keyPoints:['A reflex is better than a decision at the moment of contact.','The Bounce is built by repetition — every bounce strengthens the reflex.','Log your bounces. What gets measured gets trained.'],
+     tactics:['Look away the moment you recognize the trigger.','Redirect physically: stand up, move, change location.','Say it out loud if needed: "I made a covenant with my eyes."'],
+     scriptures:[{ref:'Job 31:1',text:'I have made a covenant with my eyes.'},{ref:'1 Corinthians 6:18',text:'Flee from sexual immorality.'}],
+     reflection:['Is bouncing a reflex yet, or is it still a decision?','What would it look like to train this over the next 30 days?','Where do you need to bounce most often right now?']},
+    {id:'ch4-s2',title:'When the Bounce Fails',quote:'A failed bounce is not the end — it is information. Study it. Close the gap.',quoteBy:'Arterburn & Stoeker',
+     body:'When the bounce fails, the right response is not a shame spiral. It is analysis. What happened? Where was the vulnerability? What was your state — tired, isolated, stressed, angry? What adjustment closes the gap? The bounce that fails teaches more than the bounce that succeeds.',
+     keyPoints:['Shame is not conviction. Conviction leads to change; shame leads to hiding.','After a failure: confess it, analyze it, adjust the perimeter.','Call your brother. Not later. Now.'],
+     scriptures:[{ref:'1 John 1:9',text:'If we confess our sins, he is faithful and just to forgive us our sins and to cleanse us from all unrighteousness.'},{ref:'Proverbs 24:16',text:'For the righteous falls seven times and rises again.'}],
+     reflection:['What state are you most vulnerable in?','When you fail, do you analyze it or hide from it?','Have you called your brother after a failure recently?']}
+  ]},
+  {id:'ch5',title:'Accountability',ch:'Ch. 5',color:'#3a7a9a',sections:[
+    {id:'ch5-s1',title:'Why You Need a Brother',quote:'Isolation is the enemy\'s greatest weapon. A man who fights alone fights at a severe disadvantage.',quoteBy:'Stephen Arterburn',
+     body:'Sin thrives in secrecy. The moment you speak it out loud to another man — a man who asks hard questions and gets honest answers — you drain power from it. Accountability is not about having someone watch over you. It is about having someone stand with you.',
+     keyPoints:['A brother who doesn\'t ask hard questions is a cheerleader, not an accountability partner.','Regular check-ins — not just crisis calls.','Honesty is non-negotiable. Partial honesty is still deception.'],
+     scriptures:[{ref:'Ecclesiastes 4:9-10',text:'Two are better than one... For if they fall, one will lift up his fellow. But woe to him who is alone when he falls.'},{ref:'James 5:16',text:'Confess your sins to one another and pray for one another, that you may be healed.'},{ref:'Proverbs 27:17',text:'Iron sharpens iron, and one man sharpens another.'}],
+     reflection:['Do you have a brother who asks hard questions?','When did you last give a completely honest answer?','What would you tell your brother right now if you had to be fully honest?']},
+    {id:'ch5-s2',title:'How Accountability Works',quote:'It\'s not about reporting. It\'s about honest answers to direct questions. That\'s it.',quoteBy:'Fred Stoeker',
+     body:'Effective accountability has a format: regular (weekly minimum), honest (no softening), and specific. Your brother should ask direct questions and you should answer directly. The conversation should be slightly uncomfortable. That\'s how you know it\'s working.',
+     keyPoints:['Weekly minimum — monthly is not accountability, it\'s catch-up.','Use direct questions, not open-ended check-ins.','Cover all three fronts: eyes, mind, heart.'],
+     scriptures:[{ref:'Hebrews 3:13',text:'Exhort one another every day, as long as it is called "today," that none of you may be hardened by the deceitfulness of sin.'}],
+     reflection:['How often are you and your brother connecting?','Are your check-ins specific or general?','What question does your brother never ask that he should?']}
+  ]},
+  {id:'ch6',title:'Marriage',ch:'Ch. 6',color:'#c8506a',sections:[
+    {id:'ch6-s1',title:'Your Wife Is Your Ally',quote:'Your wife is not the enemy. She is your fellow warrior — if you\'ll let her be.',quoteBy:'Arterburn & Stoeker',
+     body:'Your wife is your greatest human ally in this fight. A close, connected, pursued marriage is harder for the enemy to breach. The man who invests in his marriage is not doing a nice thing. He is closing a strategic gap in his defense.',
+     keyPoints:['Emotional distance from your wife increases vulnerability.','Pursuit is not a feeling — it is a decision and a habit.','She cannot be your accountability partner, but she can be your strongest supporter.'],
+     scriptures:[{ref:'Ephesians 5:25',text:'Husbands, love your wives, as Christ loved the church and gave himself up for her.'},{ref:'Proverbs 5:18-19',text:'Let your fountain be blessed, and rejoice in the wife of your youth.'}],
+     reflection:['Does your wife feel pursued or maintained?','What could you do this week that would make her feel genuinely valued?','How does your emotional connection to her affect your vulnerability?']},
+    {id:'ch6-s2',title:'Pursuit as Strategy',quote:'Moving toward your wife is not maintenance. It is a strategic decision with defensive consequences.',quoteBy:'Arterburn & Stoeker',
+     body:'Intentional investment in your marriage — romantic pursuit, genuine conversation, physical affection — is not separate from the battle plan. It is part of it. A man who neglects his marriage while fighting for purity is fighting with one hand tied behind his back.',
+     keyPoints:['Intentional connection is a pre-decided habit, not a spontaneous feeling.','Know her love language and hit it regularly.','Guard your marriage as part of your perimeter.'],
+     scriptures:[{ref:'1 Peter 3:7',text:'Likewise, husbands, live with your wives in an understanding way.'}],
+     reflection:['When did you last pursue your wife — as a decision, not a feeling?','What does she need from you that you have been withholding?','What would it look like to guard your marriage as perimeter?']}
+  ]},
+  {id:'ch7',title:'Daily Disciplines',ch:'Ch. 7',color:'#5a9aaa',sections:[
+    {id:'ch7-s1',title:'Morning Routine',quote:'Win the morning. It sets the terms for the rest of the day.',quoteBy:'Arterburn & Stoeker',
+     body:'The morning is the most defensible moment of the day. The mind is clear, the body is rested, and the demands of the day have not yet arrived. A morning routine that opens the supply lines gives you a head start before the battle begins.',
+     keyPoints:['Scripture first — even five minutes opens the supply line.','Prayer that is honest about the day ahead.','Physical movement affects the mind and vice versa.'],
+     tactics:['Set a non-negotiable morning block: even 10 minutes.','Pray specifically about known threat points in the day ahead.','Physical movement as part of the routine — not optional.'],
+     scriptures:[{ref:'Psalm 5:3',text:'O LORD, in the morning you hear my voice; in the morning I prepare a sacrifice for you and watch.'},{ref:'Lamentations 3:23',text:'They are new every morning; great is your faithfulness.'}],
+     reflection:['What does your current morning look like?','What would you need to adjust to protect a morning routine?','What one addition would make the biggest difference?']},
+    {id:'ch7-s2',title:'Evening Reset',quote:'End the day with an honest accounting. Not guilt — clarity.',quoteBy:'Fred Stoeker',
+     body:'The evening reset is a brief, honest review of the day: How did the three fronts go? Where were the victories? Where were the failures — and what do they tell you? This is not a guilt exercise. It is a tactical debrief.',
+     keyPoints:['Review the three fronts honestly — not harshly.','Note what worked and what did not.','Bring what you cannot carry to God before you close your eyes.'],
+     scriptures:[{ref:'Psalm 4:4',text:'Ponder in your own hearts on your beds, and be silent.'},{ref:'Psalm 139:23-24',text:'Search me, O God, and know my heart! Try me and know my thoughts!'}],
+     reflection:['Do you end your days with any intentional review?','What is one thing from today you want to do differently tomorrow?','What are you carrying tonight that you need to hand over?']}
+  ]},
+  {id:'ch8',title:'Resources',ch:'Ch. 8',color:'#6a9a5a',sections:[
+    {id:'ch8-s1',title:'Key Memory Verses',quote:'I have stored up your word in my heart, that I might not sin against you.',quoteBy:'Psalm 119:11',
+     body:'These verses are battle-tested weapons. Memorize at least two or three. Have them available at the moment of temptation — not requiring you to look them up. Start with Job 31:1.',
+     keyPoints:['Job 31:1 — The covenant of the eyes. The foundation verse.','2 Corinthians 10:5 — Taking every thought captive.','1 Corinthians 6:18-20 — Flee. Your body is a temple.','Philippians 4:8 — What to think instead.','Psalm 119:9-11 — How Scripture protects.','Romans 12:2 — Transformation by mind renewal.','James 1:14-15 — How temptation works.','Proverbs 4:23 — Guard the heart.'],
+     scriptures:[{ref:'Job 31:1',text:'I have made a covenant with my eyes; how then could I gaze at a virgin?'},{ref:'2 Corinthians 10:5',text:'We take every thought captive to obey Christ.'},{ref:'1 Corinthians 6:18',text:'Flee from sexual immorality.'},{ref:'Philippians 4:8',text:'Whatever is true, whatever is honorable, whatever is just, whatever is pure — think about these things.'}],
+     reflection:['Which of these do you know by heart right now?','Which one speaks most directly to your current battle?','Which verse will you memorize first?']},
+    {id:'ch8-s2',title:'Glossary of Terms',quote:'Language shapes thought. Know the terms of your battle.',quoteBy:'',
+     body:'The vocabulary of Every Man\'s Battle. Understand these precisely so you can apply the concepts.',
+     keyPoints:['The Bounce — Eyes move immediately on contact. A trained reflex, not a decision.','The Perimeter — Pre-decided, specific boundaries established before temptation arrives.','The Mental Thoroughfare — The mind\'s road: either kept clear or trafficked.','Three Fronts — Eyes (input), Mind (processing), Heart (source).','Supply Lines — Spiritual disciplines that feed the heart.','The Two-Second Rule — Eyes must bounce within two seconds.','Taking Thoughts Captive — Active rejection and redirection of corrupt thoughts.','Solid Day — All three fronts successfully maintained.'],
+     scriptures:[],
+     reflection:['Which concept is most new to you?','Which term best describes where you are right now?','Which concept do you most need to apply this week?']}
+  ]}
+];
+
+const DAILY_FOCUS=[
+  {verse:'Job 31:1',text:'I have made a covenant with my eyes.',principle:'The Covenant of the Eyes',note:'Not a feeling — a decision. Made before the moment arrives.',sid:'ch2-s1'},
+  {verse:'2 Corinthians 10:5',text:'We take every thought captive to obey Christ.',principle:'The Mental Thoroughfare',note:'You cannot choose what knocks. You can choose who gets in.',sid:'ch2-s2'},
+  {verse:'1 Corinthians 6:18',text:'Flee from sexual immorality.',principle:'The Response',note:'The Bible\'s instruction is not "resist." It is "flee." There is a difference.',sid:'ch4-s1'},
+  {verse:'Philippians 4:8',text:'Whatever is true, whatever is pure — think about these things.',principle:'Fill the Mind',note:'You cannot empty the mind. You can only fill it with something better.',sid:'ch2-s2'},
+  {verse:'Psalm 119:9-11',text:'How can a young man keep his way pure? By guarding it according to your word.',principle:'The Supply Line',note:'Scripture in the heart is a weapon ready at the moment of contact.',sid:'ch2-s3'},
+  {verse:'James 1:14-15',text:'Each person is tempted when lured and enticed by his own desire.',principle:'How It Works',note:'Know the path. Refuse to take the first step.',sid:'ch1-s2'},
+  {verse:'Proverbs 4:23',text:'Keep your heart with all vigilance, for from it flow the springs of life.',principle:'Guard the Heart',note:'The deepest front. The most neglected.',sid:'ch2-s3'},
+  {verse:'Romans 12:2',text:'Be transformed by the renewal of your mind.',principle:'Transformation',note:'Not behavior modification. Mind renewal. From the inside.',sid:'ch1-s3'},
+  {verse:'Ecclesiastes 4:9-10',text:'Two are better than one... if they fall, one will lift up his fellow.',principle:'Brotherhood',note:'The man who fights alone fights at a disadvantage he chose.',sid:'ch5-s1'},
+  {verse:'Galatians 5:16',text:'Walk by the Spirit, and you will not gratify the desires of the flesh.',principle:'Feed the Spirit',note:'Not suppression. Supply. Feed the right thing.',sid:'ch2-s3'},
+  {verse:'Proverbs 24:16',text:'For the righteous falls seven times and rises again.',principle:'After the Fall',note:'Shame says stay down. Truth says get up.',sid:'ch4-s2'},
+  {verse:'1 John 1:9',text:'If we confess our sins, he is faithful and just to forgive us.',principle:'Confession',note:'Bring it to God. Bring it to your brother. Drain the secrecy.',sid:'ch5-s1'},
+  {verse:'Psalm 101:3',text:'I will not set before my eyes anything that is worthless.',principle:'The Digital Perimeter',note:'Pre-decided. Specific. Non-negotiable.',sid:'ch3-s2'},
+  {verse:'Ephesians 5:25',text:'Husbands, love your wives, as Christ loved the church.',principle:'The Marriage Defense',note:'Moving toward her is not maintenance. It is strategy.',sid:'ch6-s1'},
+  {verse:'1 Corinthians 9:27',text:'I discipline my body and keep it under control.',principle:'Physical Discipline',note:'The body is not the enemy — but it must be governed.',sid:'ch7-s1'},
+  {verse:'Hebrews 3:13',text:'Exhort one another every day, that none may be hardened by sin.',principle:'Regular Accountability',note:'Every day. Not when it gets bad. Every day.',sid:'ch5-s2'},
+  {verse:'Psalm 5:3',text:'O LORD, in the morning you hear my voice.',principle:'Win the Morning',note:'Open the supply line before the battle starts.',sid:'ch7-s1'},
+  {verse:'James 5:16',text:'Confess your sins to one another and pray for one another, that you may be healed.',principle:'Speak It Out',note:'Sin that is spoken loses power. Sin that is hidden gains it.',sid:'ch5-s1'},
+  {verse:'Matthew 5:28',text:'Everyone who looks at a woman with lustful intent has already committed adultery in his heart.',principle:'The Stakes',note:'This is why the bounce matters. This is what is at stake.',sid:'ch2-s1'},
+  {verse:'Proverbs 27:17',text:'Iron sharpens iron, and one man sharpens another.',principle:'Brotherhood',note:'You need a man who makes you sharper, not just more comfortable.',sid:'ch5-s2'}
+];
+
+const BOUNCE_ACTIONS=[
+  {id:'air',label:'Get air',sub:'Change location. Break the pattern.'},
+  {id:'move',label:'Move',sub:'Push-ups, run, lift. Physical interrupt.'},
+  {id:'water',label:'Cold water',sub:'Hands or face. Direct physical reset.'},
+  {id:'brother',label:'Call your brother',sub:'Out loud. Breaks isolation immediately.'},
+  {id:'pray',label:'Prayer',sub:'Brief and direct. Not performance.'},
+  {id:'peri',label:'Read your perimeter',sub:'Pre-decided lines. Already settled.'}
+];
+
+const BOUNCE_TRIGGERS=['Stress','Fatigue','Isolation','Boredom','Anger','Screen time','Late night','Conflict','Pride','Idleness'];
+
+const CHECKIN_QUESTIONS=[
+  'Have you looked at anything this week you would not want me to see?',
+  'Did you bounce your eyes immediately on contact, or did you linger?',
+  'Were there situations where you put yourself in a place of known temptation?',
+  'What thoughts did you allow yourself to dwell on that you should have taken captive?',
+  'How did you feed your heart this week — Scripture, prayer, worship?',
+  'Did you reach out when you were struggling, or did you fight alone?',
+  'On a scale of 1 to 10, how solid were your perimeter lines this week?',
+  'Is there anything you are keeping from me right now?',
+  'How is your marriage? Do you feel connected to your wife?',
+  'What is your biggest vulnerability right now?',
+  'Where did you see God\'s faithfulness this week?',
+  'What do you need from me in the coming week?'
+];
+
+const PERIMETER_TEMPLATES={
+  eyes:['Bounce within two seconds — no second look, ever','No lingering looks at any woman who is not my wife','Eyes forward or down in checkout lines and public spaces','If I start to look: stop, move eyes, say "I made a covenant with my eyes"'],
+  mind:['Refuse to entertain any corrupt thought — name it, reject it, replace it','No replaying past visual inputs or fantasizing','When a thought arrives it does not get a seat at the table','Replace immediately with a prepared verse or prayer'],
+  digital:['No internet use alone after [your time] PM','Accountability software active on every device, always','No streaming services alone late at night','Phone stays out of the bedroom at night','Browser history always reviewable by my accountability partner'],
+  marriage:['No speaking negatively about my wife to others','No comparisons — she is my standard','Intentional connection at least [X] times per week','Physical affection daily — initiated by me','Never alone with another woman who is not my wife'],
+  other:['No alcohol when alone and vulnerable','Call my brother before making a decision I will regret','When I feel isolated: reach out, do not white-knuckle','If I breach a perimeter line: confess to my brother within 24 hours']
+};
+
+const JOURNAL_PROMPTS=['What tested me most on the Eyes front today?','What thoughts did I need to take captive today?','How did I feed my heart today?','Where did I see God\'s faithfulness today?','What will I do differently tomorrow?'];
+
+const STREAK_MSGS=[[90,'90 days. You are a different man than you were.'],[60,'60 days. You\'re building something real.'],[30,'30 days. Most men never get here.'],[21,'Three weeks. This is becoming who you are.'],[14,'Two weeks strong. Keep feeding the right thing.'],[7,'One week. The pattern is taking shape.'],[3,'Three solid days. The reflex is forming.'],[1,'Day one. Build the foundation.'],[0,'The battle begins again. Get after it.']];
+
+/* === STORAGE === */
+const SK='ledger_emb_3';
+function obf(s){return btoa(unescape(encodeURIComponent(s+'::L3')));}
+function dob(s){try{return decodeURIComponent(escape(atob(s))).replace('::L3','');}catch{return null;}}
+function loadData(){try{const r=localStorage.getItem(SK);return r?JSON.parse(r):null;}catch{return null;}}
+function save(){try{localStorage.setItem(SK,JSON.stringify(APP));}catch(e){console.error('Save error',e);}}
+
+/* === STATE === */
+let APP=null,editTaskId=null,editLineId=null,editJrnlId=null,editVTId=null;
+let tempMode=null,timerIv=null,timerSecs=0,selBounceAction=null,selTrigger=null;
+let currentSectionId=null,manualFilter='all';
+
+/* === DATE UTILS === */
+function todayStr(){const d=new Date();return ymd(d);}
+function p2(n){return String(n).padStart(2,'0');}
+function ymd(d){return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;}
+function pd(s){if(!s)return new Date();const[y,m,dv]=s.split('-').map(Number);return new Date(y,m-1,dv);}
+function fmtD(s){if(!s)return '?';return pd(s).toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function fmtDL(s){if(!s)return '?';return pd(s).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
+function daysSince(ds){if(!ds)return null;return Math.round((pd(todayStr())-pd(ds))/86400000);}
+function dayOfYear(){const n=new Date(),s=new Date(n.getFullYear(),0,0);return Math.floor((n-s)/86400000);}
+
+function calcNext(task,fromStr){
+  const base=pd(fromStr);
+  if(task.freq==='daily'){const n=new Date(base);n.setDate(n.getDate()+1);return ymd(n);}
+  if(task.freq==='every_x'){const x=Math.max(2,parseInt(task.xDays)||2);const n=new Date(base);n.setDate(n.getDate()+x);return ymd(n);}
+  if(task.freq==='weekly'){const dow=parseInt(task.dow);const n=new Date(base);n.setDate(n.getDate()+1);while(n.getDay()!==dow)n.setDate(n.getDate()+1);return ymd(n);}
+  return fromStr;
+}
+function isDue(t){return !t.nextDue||t.nextDue<=todayStr();}
+function isOD(t){return !!t.nextDue&&t.nextDue<todayStr();}
+
+/* === DEFAULTS === */
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+function defaultTasks(m){const t=todayStr();const b=[{id:uid(),name:'Morning routine',freq:'daily',xDays:1,dow:1,nextDue:t,lastDone:null},{id:uid(),name:'Physical training',freq:'daily',xDays:1,dow:1,nextDue:t,lastDone:null},{id:uid(),name:'Evening reset',freq:'daily',xDays:1,dow:1,nextDue:t,lastDone:null}];if(m==='married')b.push({id:uid(),name:'Intentional time with her',freq:'every_x',xDays:7,dow:5,nextDue:t,lastDone:null});return b;}
+function defaultPerimeter(m){const l=[{id:uid(),cat:'eyes',line:'Bounce within two seconds — no second look'},{id:uid(),cat:'eyes',line:'No lingering — redirect immediately on first contact'},{id:uid(),cat:'mind',line:'Refuse to entertain — name it, reject it, replace it'},{id:uid(),cat:'digital',line:'No internet alone after 10pm'},{id:uid(),cat:'digital',line:'Accountability filter active on every device'}];if(m==='married')l.push({id:uid(),cat:'marriage',line:'No comparisons — she is the standard'},{id:uid(),cat:'marriage',line:'Never speak against her to others'});return l;}
+function makeApp(m,pw){return{password:pw,mode:m,tasks:defaultTasks(m),dailyLog:{},perimeter:defaultPerimeter(m),bounceLog:[],accountability:{brotherName:'',phone:'',checkins:[]},journal:[],vtLog:[],manualProgress:{},manualBookmarks:[],notes:''};}
+
+/* === THREE FRONTS === */
+function getFronts(m){const f=[{key:'eyes',label:'Eyes',sub:'Two-second rule held — bounced on contact'},{key:'mind',label:'Mind',sub:'Thoroughfare cleared — refused to entertain'},{key:'heart',label:'Heart',sub:'Supply lines open — prayer, Scripture, or devotion'}];if(m==='married'){f.push({key:'connection',label:'Connection',sub:'Intentional conversation — present and engaged'});f.push({key:'investment',label:'Investment',sub:'Moved toward her — specific and deliberate'});}return f;}
+
+/* === STATS === */
+function getLog(ds){if(!APP.dailyLog[ds])APP.dailyLog[ds]={heldLines:[],heartFeed:[]};if(!APP.dailyLog[ds].heldLines)APP.dailyLog[ds].heldLines=[];if(!APP.dailyLog[ds].heartFeed)APP.dailyLog[ds].heartFeed=[];return APP.dailyLog[ds];}
+function getTL(){return getLog(todayStr());}
+function isSolid(ds){const l=APP.dailyLog[ds];return !!(l&&l.eyes&&l.mind&&l.heart);}
+function calcStreak(){let s=0;const d=new Date();for(let i=0;i<3650;i++){const ds=ymd(d);if(ds>todayStr()){d.setDate(d.getDate()-1);continue;}if(!isSolid(ds))break;s++;d.setDate(d.getDate()-1);}return s;}
+function calcLongest(){const dates=Object.keys(APP.dailyLog).filter(isSolid).sort();if(!dates.length)return 0;let best=1,cur=1;for(let i=1;i<dates.length;i++){const diff=Math.round((pd(dates[i])-pd(dates[i-1]))/86400000);if(diff===1){cur++;best=Math.max(best,cur);}else cur=1;}return best;}
+function countSolid(){return Object.keys(APP.dailyLog).filter(isSolid).length;}
+function totalBounces(){return APP.bounceLog.length;}
+function getStreakMsg(s){for(const[m,t]of STREAK_MSGS){if(s>=m)return t;}return STREAK_MSGS[STREAK_MSGS.length-1][1];}
+function getHeatData(){const today=pd(todayStr()),cols=[];const start=new Date(today);start.setDate(start.getDate()-(12*7)-start.getDay());for(let w=0;w<13;w++){const col=[];for(let d=0;d<7;d++){const date=new Date(start);date.setDate(start.getDate()+w*7+d);const ds=ymd(date),log=APP.dailyLog[ds];col.push({ds,solid:isSolid(ds),has:!!(log&&(log.eyes||log.mind||log.heart)),isToday:ds===todayStr(),future:date>today});}cols.push(col);}return cols;}
+function getMonthlySummary(){const now=new Date(),yr=now.getFullYear(),mo=now.getMonth(),dim=new Date(yr,mo+1,0).getDate();let solid=0,partial=0,bounces=0,checkins=0;for(let d=1;d<=dim;d++){const ds=`${yr}-${p2(mo+1)}-${p2(d)}`;if(ds>todayStr())break;const log=APP.dailyLog[ds];if(isSolid(ds))solid++;else if(log&&(log.eyes||log.mind||log.heart))partial++;bounces+=APP.bounceLog.filter(b=>b.date===ds).length;}checkins=(APP.accountability.checkins||[]).filter(c=>{const d=pd(c.date);return d.getFullYear()===yr&&d.getMonth()===mo;}).length;return{solid,partial,bounces,checkins,month:now.toLocaleDateString('en-US',{month:'long',year:'numeric'})};}
+
+/* === INIT === */
+window.addEventListener('DOMContentLoaded',()=>{
+  const data=loadData();
+  if(!data||!data.password){showScreen('setup-screen');return;}
+  APP=data;
+  if(!APP.journal)APP.journal=[];if(!APP.vtLog)APP.vtLog=[];if(!APP.manualProgress)APP.manualProgress={};if(!APP.manualBookmarks)APP.manualBookmarks=[];
+  showScreen('lock-screen');
+  document.getElementById('lock-date-sub').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}).toUpperCase();
+  setTimeout(()=>document.getElementById('lock-pass').focus(),150);
+});
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+/* === SETUP === */
+let setupMode=null;
+function pickSetupMode(m){setupMode=m;document.getElementById('ms-single').classList.toggle('sel',m==='single');document.getElementById('ms-married').classList.toggle('sel',m==='married');}
+function goStep2(){if(!setupMode){alert('Select a mode.');return;}document.getElementById('s1').style.display='none';document.getElementById('s2').style.display='';document.getElementById('sp1').focus();}
+function finishSetup(){const p1=document.getElementById('sp1').value.trim(),p2v=document.getElementById('sp2').value.trim(),err=document.getElementById('setup-err');if(!p1){err.textContent='Passcode required.';return;}if(p1!==p2v){err.textContent='Passcodes do not match.';return;}APP=makeApp(setupMode,obf(p1));save();launch();}
+
+/* === LOCK === */
+function doUnlock(){const pass=document.getElementById('lock-pass').value,err=document.getElementById('lock-err');if(!pass){err.textContent='Enter passcode.';return;}if(dob(APP.password)===pass){err.textContent='';document.getElementById('lock-pass').value='';launch();}else{err.textContent='Incorrect.';document.getElementById('lock-pass').value='';}}
+
+function launch(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}).toUpperCase();
+  renderAll();
+}
+
+/* === RENDER === */
+function renderAll(){renderTopbar();renderManual();renderToday();renderBounceView();renderJournal();renderSettingsAll();}
+
+function renderTopbar(){const streak=calcStreak(),el=document.getElementById('top-streak');el.textContent=streak>0?streak+'d streak':'';el.classList.toggle('hot',streak>=3);}
+
+/* --- MANUAL --- */
+function renderManual(){
+  const all=MANUAL.flatMap(ch=>ch.sections),read=all.filter(s=>APP.manualProgress[s.id]).length;
+  document.getElementById('manual-prog-fill').style.width=(all.length?Math.round(read/all.length*100):0)+'%';
+  document.getElementById('manual-prog-lbl').textContent=`${read} / ${all.length} read`;
+  renderManualList();
+}
+function setManualFilter(f,btn){manualFilter=f;document.querySelectorAll('.mfbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderManualList();}
+function renderManualList(){
+  let html='',any=false;
+  MANUAL.forEach(ch=>{
+    const vis=ch.sections.filter(s=>manualFilter==='bookmarks'?APP.manualBookmarks.includes(s.id):manualFilter==='unread'?!APP.manualProgress[s.id]:true);
+    if(!vis.length)return;any=true;
+    html+=`<div class="ch-block"><div class="ch-head"><div class="ch-dot" style="background:${ch.color}"></div><span class="ch-num">${esc(ch.ch)}</span><span class="ch-title">${esc(ch.title)}</span></div>
+    <div class="card" style="padding:0 14px;">
+    ${vis.map(s=>`<div class="msec-row" onclick="openManualSection('${s.id}')">
+      <div class="msec-read ${APP.manualProgress[s.id]?'done':''}"></div>
+      <div class="msec-title">${esc(s.title)}</div>
+      <button class="msec-bm ${APP.manualBookmarks.includes(s.id)?'bmon':''}" onclick="toggleBookmark('${s.id}',event)">&#9733;</button>
+      <span style="color:var(--tx3);font-size:.9rem;margin-left:2px;">&#8250;</span>
+    </div>`).join('')}
+    </div></div>`;
+  });
+  document.getElementById('manual-list').innerHTML=any?html:'<div class="empty"><div class="empty-ttl">Nothing here</div><div class="empty-body">No sections match this filter.</div></div>';
+}
+function toggleBookmark(sid,e){if(e)e.stopPropagation();const idx=APP.manualBookmarks.indexOf(sid);if(idx>-1)APP.manualBookmarks.splice(idx,1);else APP.manualBookmarks.push(sid);save();renderManualList();}
+function openManualSection(sid){
+  const sec=MANUAL.flatMap(ch=>ch.sections).find(s=>s.id===sid);
+  const ch=MANUAL.find(c=>c.sections.some(s=>s.id===sid));
+  if(!sec||!ch)return;currentSectionId=sid;
+  document.getElementById('msec-title').textContent=sec.title;
+  document.getElementById('msec-sub').textContent=`${ch.ch} — ${ch.title}`;
+  const bm=APP.manualBookmarks.includes(sid);
+  document.getElementById('msec-bm-btn').textContent=bm?'Bookmarked':'Bookmark';
+  const read=!!APP.manualProgress[sid];
+  const rb=document.getElementById('msec-read-btn');rb.textContent=read?'Mark unread':'Mark as read';rb.classList.toggle('bgrn',!read);
+  let html='';
+  if(sec.quote)html+=`<div class="sdquote"><div class="sdqtext">"${esc(sec.quote)}"</div>${sec.quoteBy?`<div class="sdqby">— ${esc(sec.quoteBy)}</div>`:''}</div>`;
+  if(sec.body)html+=`<div class="sdbody">${esc(sec.body)}</div>`;
+  if(sec.keyPoints&&sec.keyPoints.length){html+=`<div class="sdh">Key Points</div>`;html+=sec.keyPoints.map(p=>`<div class="sdpoint">${esc(p)}</div>`).join('');}
+  if(sec.tactics&&sec.tactics.length){html+=`<div class="sdh">Tactics</div>`;html+=sec.tactics.map(t=>`<div class="sdtactic">${esc(t)}</div>`).join('');}
+  if(sec.scriptures&&sec.scriptures.length){html+=`<div class="sdh">Scripture</div>`;html+=sec.scriptures.map(v=>`<div class="scblk"><div class="scref">${esc(v.ref)}</div><div class="sctext">${esc(v.text)}</div></div>`).join('');}
+  if(sec.reflection&&sec.reflection.length){html+=`<div class="sdh">Reflection</div>`;html+=sec.reflection.map((q,i)=>`<div class="refq" data-n="${i+1}">${esc(q)}</div>`).join('');}
+  document.getElementById('msec-body').innerHTML=html;
+  openModal('modal-section');
+}
+function toggleSectionBookmark(){if(!currentSectionId)return;toggleBookmark(currentSectionId,null);document.getElementById('msec-bm-btn').textContent=APP.manualBookmarks.includes(currentSectionId)?'Bookmarked':'Bookmark';}
+function markSectionRead(){if(!currentSectionId)return;APP.manualProgress[currentSectionId]=!APP.manualProgress[currentSectionId];save();const read=!!APP.manualProgress[currentSectionId];const rb=document.getElementById('msec-read-btn');rb.textContent=read?'Mark unread':'Mark as read';rb.classList.toggle('bgrn',!read);renderManual();}
+
+/* --- TODAY --- */
+function renderToday(){renderFocus();renderHeartFeed();renderFronts();renderTodayTasks();renderTodayStats();}
+function renderFocus(){const f=DAILY_FOCUS[dayOfYear()%DAILY_FOCUS.length];document.getElementById('focus-principle').textContent=f.principle;document.getElementById('focus-verse').textContent=f.verse;document.getElementById('focus-note').textContent=f.note;}
+function openFocusSection(){const f=DAILY_FOCUS[dayOfYear()%DAILY_FOCUS.length];if(f.sid)openManualSection(f.sid);}
+function renderHeartFeed(){const feed=getTL().heartFeed||[];['prayer','scripture','worship'].forEach(k=>document.getElementById('hf-'+k).classList.toggle('fed',feed.includes(k)));}
+function toggleHeartFeed(key){const log=getTL();if(!log.heartFeed)log.heartFeed=[];const idx=log.heartFeed.indexOf(key);if(idx>-1)log.heartFeed.splice(idx,1);else log.heartFeed.push(key);save();renderHeartFeed();}
+function renderFronts(){
+  const log=getTL(),fronts=getFronts(APP.mode),allDone=fronts.slice(0,3).every(f=>log[f.key]);
+  document.getElementById('fronts-list').innerHTML=fronts.map((f,i)=>{const done=!!log[f.key];return `<div class="ci" onclick="toggleFront(${i})"><div class="cbox ${done?'done':''}"></div><div style="flex:1;"><div class="clbl ${done?'struck':''}">${f.label}</div><div class="csub">${f.sub}</div></div></div>`;}).join('');
+  document.getElementById('solid-badge-wrap').innerHTML=allDone?'<span class="solid-badge">Solid</span>':'';
+}
+function toggleFront(idx){const log=getTL(),fronts=getFronts(APP.mode),f=fronts[idx];if(!f)return;log[f.key]=!log[f.key];save();renderFronts();renderTodayStats();renderTopbar();}
+function renderTodayTasks(){
+  const due=APP.tasks.filter(isDue),el=document.getElementById('today-tasks');
+  if(!due.length){el.innerHTML='<div class="empty"><div class="empty-ttl">No tasks due</div><div class="empty-body">All complete, or none added yet. Tap Add to set up your disciplines.</div></div>';return;}
+  el.innerHTML=due.map(t=>{const od=isOD(t),ds=od?daysSince(t.nextDue):0;return `<div class="ci ${od?'od':''}" onclick="completeTask('${t.id}')"><div class="cbox"></div><div style="flex:1;"><div class="clbl">${esc(t.name)}</div></div><div class="cright">${od?ds+'d overdue':'today'}</div></div>`;}).join('');
+}
+function completeTask(id){const t=APP.tasks.find(x=>x.id===id);if(!t)return;t.lastDone=todayStr();t.nextDue=calcNext(t,todayStr());save();renderTodayTasks();renderTodayStats();}
+function renderTodayStats(){const today=todayStr();document.getElementById('ss-streak').textContent=calcStreak();document.getElementById('ss-bounces').textContent=APP.bounceLog.filter(b=>b.date===today).length;document.getElementById('ss-solid').textContent=countSolid();}
+
+/* --- BOUNCE VIEW --- */
+function renderBounceView(){const el=document.getElementById('bounce-log-list'),today=APP.bounceLog.filter(b=>b.date===todayStr()).slice().reverse();if(!today.length){el.innerHTML='<div class="empty"><div class="empty-ttl">No bounces today</div><div class="empty-body">When temptation hits, use the BOUNCE button above. Every logged bounce trains the reflex.</div></div>';return;}el.innerHTML=today.map(b=>`<div class="bent"><div class="btime">${b.time||''}</div><div><div class="bact">${esc(b.action)}${b.trigger?` <span style="font-size:.7rem;color:var(--tx3)"> · ${esc(b.trigger)}</span>`:''}</div>${b.note?`<div class="bnote">${esc(b.note)}</div>`:''}</div></div>`).join('');}
+
+/* --- JOURNAL --- */
+function switchJTab(tab,btn){document.querySelectorAll('.jtab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('jcontent-daily').style.display=tab==='daily'?'':'none';document.getElementById('jcontent-vt').style.display=tab==='vt'?'':'none';}
+function renderJournal(){renderJournalList();renderVTList();}
+function renderJournalList(){const el=document.getElementById('journal-list'),entries=(APP.journal||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));if(!entries.length){el.innerHTML='<div class="empty"><div class="empty-ttl">No journal entries</div><div class="empty-body">Write honestly. Complete the Three Fronts and guided prompts will appear when you add an entry.</div></div>';return;}el.innerHTML=entries.map(e=>`<div class="jentry" onclick="openJournalEntry('${e.id}')"><div class="jentry-date">${fmtDL(e.date)}</div><div class="jentry-preview">${esc(e.text)}</div></div>`).join('');}
+function renderVTList(){const el=document.getElementById('vt-list'),entries=(APP.vtLog||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));if(!entries.length){el.innerHTML='<div class="empty"><div class="empty-ttl">No battle log entries</div><div class="empty-body">Log victories and temptations. Name the trigger. Name the response. What you analyze, you improve.</div></div>';return;}el.innerHTML=entries.map(e=>`<div class="vtentry" onclick="openVTEntry('${e.id}')"><div class="vt-badge ${e.type}">${e.type==='victory'?'Victory':'Temptation'}</div><div class="vt-sit">${esc(e.situation)}</div>${e.lesson?`<div class="vt-lesson">${esc(e.lesson)}</div>`:''}</div>`).join('');}
+
+/* --- SETTINGS --- */
+function renderSettingsAll(){renderStats();renderPerimeter();renderBrother();renderPrefs();}
+function switchStab(tab,btn){document.querySelectorAll('.stab-pane').forEach(el=>el.classList.remove('active'));document.querySelectorAll('.stab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('stab-'+tab).classList.add('active');btn.classList.add('active');}
+function renderStats(){const streak=calcStreak();document.getElementById('stat-streak').textContent=streak;document.getElementById('stat-longest').textContent=calcLongest();document.getElementById('stat-solid-total').textContent=countSolid();document.getElementById('stat-bounces-total').textContent=totalBounces();document.getElementById('streak-msg').textContent=getStreakMsg(streak);renderHeatMap();renderMonthlySummary();}
+function renderHeatMap(){document.getElementById('heat-map').innerHTML=getHeatData().map(col=>`<div class="hmap-col">${col.map(cell=>{if(cell.future)return `<div class="hmap-cell"></div>`;let cls='hmap-cell';if(cell.solid)cls+=' solid';else if(cell.has)cls+=' partial';if(cell.isToday)cls+=' today';return `<div class="${cls}" title="${cell.ds}"></div>`;}).join('')}</div>`).join('');}
+function renderMonthlySummary(){const ms=getMonthlySummary();document.getElementById('monthly-summary').innerHTML=`<div style="font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);font-weight:700;margin-bottom:12px;">${esc(ms.month)}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div><div style="font-family:var(--mono);font-size:1.4rem;color:var(--tx2);font-weight:700;">${ms.solid}</div><div style="font-size:.68rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Solid days</div></div><div><div style="font-family:var(--mono);font-size:1.4rem;color:var(--tx2);font-weight:700;">${ms.partial}</div><div style="font-size:.68rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Partial days</div></div><div><div style="font-family:var(--mono);font-size:1.4rem;color:var(--tx2);font-weight:700;">${ms.bounces}</div><div style="font-size:.68rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Bounces</div></div><div><div style="font-family:var(--mono);font-size:1.4rem;color:var(--tx2);font-weight:700;">${ms.checkins}</div><div style="font-size:.68rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Check-ins</div></div></div>`;}
+function renderPerimeter(){const log=getTL(),cats=['eyes','mind','digital','marriage','other'],catLbl={eyes:'Eyes',mind:'Mind',digital:'Digital',marriage:'Marriage',other:'Other'},grouped={eyes:[],mind:[],digital:[],marriage:[],other:[]};APP.perimeter.forEach(l=>{(grouped[l.cat]||grouped.other).push(l);});let html='';cats.forEach(cat=>{const lines=grouped[cat];if(!lines.length)return;html+=`<div class="catgrp"><div class="cathead">${catLbl[cat]}</div><div class="card" style="padding:0 14px;">${lines.map(line=>{const held=log.heldLines.includes(line.id);return `<div class="pline"><div class="pbox ${held?'held':''}" onclick="toggleHeld('${line.id}',event)"></div><div class="ptxt ${held?'held':''}" onclick="toggleHeld('${line.id}',event)">${esc(line.line)}</div><button class="pedit" onclick="openEditLine('${line.id}',event)">&#x270E;</button></div>`;}).join('')}</div></div>`;});document.getElementById('perimeter-list').innerHTML=html||'<div class="empty"><div class="empty-ttl">No lines defined</div><div class="empty-body">Use Templates to add pre-built lines, or add your own.</div></div>';}
+function toggleHeld(lineId,e){if(e)e.stopPropagation();const log=getTL();const idx=log.heldLines.indexOf(lineId);if(idx>-1)log.heldLines.splice(idx,1);else log.heldLines.push(lineId);save();renderPerimeter();}
+function renderBrother(){const acc=APP.accountability,last=acc.checkins&&acc.checkins.length?acc.checkins[acc.checkins.length-1].date:null,since=daysSince(last),sinceText=since===null?'No check-ins logged':since===0?'Checked in today':`${since} day${since!==1?'s':''} since last check-in`;document.getElementById('bro-header-block').innerHTML=`<div class="brohdr"><div class="crow"><div><div class="broname">${acc.brotherName?esc(acc.brotherName):'<span style="color:var(--tx3)">No brother set</span>'}</div><div class="brosince ${since!==null&&since>7?'od':''}">${sinceText}</div>${acc.phone?`<div class="brosince" style="margin-top:4px;">${esc(acc.phone)}</div>`:''}</div><button class="btn bsm" onclick="openEditBrother()">Edit</button></div></div>`;const list=document.getElementById('checkin-list'),checkins=(acc.checkins||[]).slice().reverse().slice(0,20);if(!checkins.length){list.innerHTML='<div class="empty"><div class="empty-ttl">No check-ins logged</div><div class="empty-body">Weekly minimum. Use the Questions button to see what to ask.</div></div>';return;}list.innerHTML=checkins.map(c=>`<div class="cie"><div class="cidate">${fmtD(c.date)}</div><div class="cinotes">${esc(c.notes)||'—'}</div></div>`).join('');}
+function renderPrefs(){document.getElementById('mode-display').textContent=APP.mode==='married'?'Married':'Single';document.getElementById('bro-name-display').textContent=APP.accountability.brotherName||'Not set';}
+
+/* === NAVIGATION === */
+function switchView(name,btn){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));document.getElementById('view-'+name).classList.add('active');btn.classList.add('active');if(name==='manual')renderManual();if(name==='today')renderToday();if(name==='bounce')renderBounceView();if(name==='journal')renderJournal();if(name==='settings')renderSettingsAll();}
+
+/* === BOUNCE MODAL === */
+function openBounceModal(){selBounceAction=null;selTrigger=null;stopTimer();document.getElementById('bounce-note-input').value='';document.getElementById('timer-disp').style.display='none';document.getElementById('timer-stop-btn').style.display='none';document.getElementById('trigger-row').innerHTML=BOUNCE_TRIGGERS.map(t=>`<button class="trig-btn" onclick="selTrigFn('${esc(t)}',this)">${t}</button>`).join('');document.getElementById('bounce-action-grid').innerHTML=BOUNCE_ACTIONS.map(a=>`<button class="abtn" id="ba-${a.id}" onclick="selAct('${a.id}')">${esc(a.label)}<span class="absub">${esc(a.sub)}</span></button>`).join('');openModal('modal-bounce');}
+function selTrigFn(t,btn){selTrigger=t;document.querySelectorAll('.trig-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');}
+function selAct(id){selBounceAction=id;document.querySelectorAll('.abtn').forEach(b=>b.classList.remove('sel'));const el=document.getElementById('ba-'+id);if(el)el.classList.add('sel');}
+function logBounce(){const action=selBounceAction?(BOUNCE_ACTIONS.find(a=>a.id===selBounceAction)||{label:'Bounced'}).label:'Bounced';const note=document.getElementById('bounce-note-input').value.trim();const now=new Date(),timeStr=now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});APP.bounceLog.push({id:uid(),date:todayStr(),time:timeStr,action,trigger:selTrigger||'',note});save();stopTimer();closeModal('modal-bounce');renderBounceView();renderTodayStats();renderTopbar();}
+
+/* === TIMER === */
+function startTimer(mins){stopTimer();timerSecs=mins*60;document.getElementById('timer-disp').style.display='block';document.getElementById('timer-stop-btn').style.display='';paintTimer();timerIv=setInterval(()=>{timerSecs--;paintTimer();if(timerSecs<=0){clearInterval(timerIv);timerIv=null;document.getElementById('timer-disp').textContent='00:00';}},1000);}
+function paintTimer(){const m=Math.floor(timerSecs/60),s=timerSecs%60;document.getElementById('timer-disp').textContent=p2(m)+':'+p2(s);}
+function stopTimer(){if(timerIv){clearInterval(timerIv);timerIv=null;}timerSecs=0;const td=document.getElementById('timer-disp'),ts=document.getElementById('timer-stop-btn');if(td)td.style.display='none';if(ts)ts.style.display='none';}
+
+/* === TASKS === */
+function openAddTask(){editTaskId=null;document.getElementById('task-mttl').textContent='New task';document.getElementById('task-name').value='';document.getElementById('task-freq').value='daily';document.getElementById('task-xdays').value='3';document.getElementById('task-dow').value='1';document.getElementById('task-del-wrap').style.display='none';onFreqChange();openModal('modal-task');setTimeout(()=>document.getElementById('task-name').focus(),200);}
+function onFreqChange(){const f=document.getElementById('task-freq').value;document.getElementById('xdays-field').style.display=f==='every_x'?'':'none';document.getElementById('dow-field').style.display=f==='weekly'?'':'none';}
+function saveTask(){const name=document.getElementById('task-name').value.trim();if(!name){alert('Task name required.');return;}const freq=document.getElementById('task-freq').value,xDays=parseInt(document.getElementById('task-xdays').value)||3,dow=parseInt(document.getElementById('task-dow').value);if(editTaskId){const t=APP.tasks.find(x=>x.id===editTaskId);if(t){t.name=name;t.freq=freq;t.xDays=xDays;t.dow=dow;if(t.lastDone)t.nextDue=calcNext(t,t.lastDone);}}else APP.tasks.push({id:uid(),name,freq,xDays,dow,nextDue:todayStr(),lastDone:null});save();closeModal('modal-task');renderTodayTasks();}
+function deleteTask(){if(!editTaskId||!confirm('Delete this task?'))return;APP.tasks=APP.tasks.filter(t=>t.id!==editTaskId);save();closeModal('modal-task');renderTodayTasks();}
+
+/* === PERIMETER === */
+function openAddLine(){editLineId=null;document.getElementById('line-mttl').textContent='New line';document.getElementById('line-cat').value='eyes';document.getElementById('line-text').value='';document.getElementById('line-del-wrap').style.display='none';openModal('modal-line');setTimeout(()=>document.getElementById('line-text').focus(),200);}
+function openEditLine(id,e){if(e)e.stopPropagation();const l=APP.perimeter.find(x=>x.id===id);if(!l)return;editLineId=id;document.getElementById('line-mttl').textContent='Edit line';document.getElementById('line-cat').value=l.cat;document.getElementById('line-text').value=l.line;document.getElementById('line-del-wrap').style.display='';openModal('modal-line');}
+function saveLine(){const cat=document.getElementById('line-cat').value,line=document.getElementById('line-text').value.trim();if(!line){alert('Enter the line.');return;}if(editLineId){const l=APP.perimeter.find(x=>x.id===editLineId);if(l){l.cat=cat;l.line=line;}}else APP.perimeter.push({id:uid(),cat,line});save();closeModal('modal-line');renderPerimeter();}
+function deleteLine(){if(!editLineId||!confirm('Delete this line?'))return;APP.perimeter=APP.perimeter.filter(l=>l.id!==editLineId);save();closeModal('modal-line');renderPerimeter();}
+function openTemplates(){document.getElementById('tmpl-cat').value='eyes';renderTemplateList();openModal('modal-templates');}
+function renderTemplateList(){const cat=document.getElementById('tmpl-cat').value,lines=PERIMETER_TEMPLATES[cat]||[],existing=APP.perimeter.map(p=>p.line);document.getElementById('tmpl-list').innerHTML=lines.map(line=>{const added=existing.includes(line);return `<div class="tmpl-item ${added?'added':''}" onclick="${added?'':'addTmpl(\''+cat+'\',\''+line.replace(/'/g,"\\'").replace(/\\/g,'\\\\')+'\')'}" style="${added?'cursor:default':''}"><div class="tmpl-add">${added?'v':'+'}</div><div class="tmpl-text">${esc(line)}</div></div>`;}).join('');}
+function addTmpl(cat,line){APP.perimeter.push({id:uid(),cat,line});save();renderPerimeter();renderTemplateList();}
+
+/* === ACCOUNTABILITY === */
+function openLogCheckin(){document.getElementById('ci-date').value=todayStr();document.getElementById('ci-notes').value='';openModal('modal-checkin');}
+function saveCheckin(){const date=document.getElementById('ci-date').value,notes=document.getElementById('ci-notes').value.trim();if(!date){alert('Date required.');return;}if(!APP.accountability.checkins)APP.accountability.checkins=[];APP.accountability.checkins.push({id:uid(),date,notes});APP.accountability.checkins.sort((a,b)=>a.date.localeCompare(b.date));save();closeModal('modal-checkin');renderBrother();}
+function openCheckinQuestions(){document.getElementById('ciq-list').innerHTML=CHECKIN_QUESTIONS.map((q,i)=>`<div class="ciq" data-n="${i+1}">${esc(q)}</div>`).join('');openModal('modal-questions');}
+function openEditBrother(){document.getElementById('bro-name').value=APP.accountability.brotherName||'';document.getElementById('bro-phone').value=APP.accountability.phone||'';openModal('modal-brother');}
+function saveBrother(){APP.accountability.brotherName=document.getElementById('bro-name').value.trim();APP.accountability.phone=document.getElementById('bro-phone').value.trim();save();closeModal('modal-brother');renderBrother();renderPrefs();}
+
+/* === JOURNAL === */
+function openJournalEntry(id){editJrnlId=id;if(id){const e=(APP.journal||[]).find(x=>x.id===id);if(!e)return;document.getElementById('jrnl-mttl').textContent='Edit entry';document.getElementById('jrnl-date').value=e.date;document.getElementById('jrnl-text').value=e.text;document.getElementById('jrnl-prompts').style.display='none';document.getElementById('jrnl-del-wrap').style.display='';}else{document.getElementById('jrnl-mttl').textContent='New entry';document.getElementById('jrnl-date').value=todayStr();document.getElementById('jrnl-text').value='';document.getElementById('jrnl-del-wrap').style.display='none';const log=getTL(),allDone=getFronts(APP.mode).slice(0,3).every(f=>log[f.key]),pblock=document.getElementById('jrnl-prompts');if(allDone){pblock.style.display='';document.getElementById('jrnl-prompt-list').innerHTML=JOURNAL_PROMPTS.map((p,i)=>`<div style="padding:8px 0;border-bottom:1px solid var(--bdr);font-size:.8rem;color:var(--tx3);line-height:1.5;">${i+1}. ${esc(p)}</div>`).join('');}else pblock.style.display='none';}openModal('modal-journal');setTimeout(()=>document.getElementById('jrnl-text').focus(),200);}
+function saveJournalEntry(){const date=document.getElementById('jrnl-date').value,text=document.getElementById('jrnl-text').value.trim();if(!date||!text){alert('Date and entry required.');return;}if(!APP.journal)APP.journal=[];if(editJrnlId){const e=APP.journal.find(x=>x.id===editJrnlId);if(e){e.date=date;e.text=text;}}else APP.journal.push({id:uid(),date,text});save();closeModal('modal-journal');renderJournalList();}
+function deleteJournalEntry(){if(!editJrnlId||!confirm('Delete this entry?'))return;APP.journal=(APP.journal||[]).filter(e=>e.id!==editJrnlId);save();closeModal('modal-journal');renderJournalList();}
+
+/* === V/T LOG === */
+function openVTEntry(id){editVTId=id;if(id){const e=(APP.vtLog||[]).find(x=>x.id===id);if(!e)return;document.getElementById('vt-mttl').textContent='Edit entry';document.getElementById('vt-type').value=e.type;document.getElementById('vt-date').value=e.date;document.getElementById('vt-sit').value=e.situation||'';document.getElementById('vt-trig').value=e.trigger||'';document.getElementById('vt-resp').value=e.response||'';document.getElementById('vt-lesson').value=e.lesson||'';document.getElementById('vt-del-wrap').style.display='';}else{document.getElementById('vt-mttl').textContent='Battle log entry';document.getElementById('vt-type').value='victory';document.getElementById('vt-date').value=todayStr();['vt-sit','vt-trig','vt-resp','vt-lesson'].forEach(i=>document.getElementById(i).value='');document.getElementById('vt-del-wrap').style.display='none';}openModal('modal-vt');}
+function saveVTEntry(){const type=document.getElementById('vt-type').value,date=document.getElementById('vt-date').value,situation=document.getElementById('vt-sit').value.trim();if(!date||!situation){alert('Date and situation required.');return;}if(!APP.vtLog)APP.vtLog=[];const entry={id:editVTId||uid(),type,date,situation,trigger:document.getElementById('vt-trig').value.trim(),response:document.getElementById('vt-resp').value.trim(),lesson:document.getElementById('vt-lesson').value.trim()};if(editVTId){const idx=APP.vtLog.findIndex(x=>x.id===editVTId);if(idx>-1)APP.vtLog[idx]=entry;}else APP.vtLog.push(entry);save();closeModal('modal-vt');renderVTList();}
+function deleteVTEntry(){if(!editVTId||!confirm('Delete this entry?'))return;APP.vtLog=(APP.vtLog||[]).filter(e=>e.id!==editVTId);save();closeModal('modal-vt');renderVTList();}
+
+/* === SETTINGS === */
+function openChangePass(){['cp-cur','cp-new','cp-con'].forEach(id=>document.getElementById(id).value='');document.getElementById('cp-err').textContent='';openModal('modal-pass');}
+function savePass(){const cur=document.getElementById('cp-cur').value,nw=document.getElementById('cp-new').value,con=document.getElementById('cp-con').value,err=document.getElementById('cp-err');if(dob(APP.password)!==cur){err.textContent='Current passcode incorrect.';return;}if(!nw){err.textContent='New passcode required.';return;}if(nw!==con){err.textContent='Passcodes do not match.';return;}APP.password=obf(nw);save();closeModal('modal-pass');}
+function openChangeMode(){tempMode=APP.mode;document.getElementById('cm-single').classList.toggle('sel',tempMode==='single');document.getElementById('cm-married').classList.toggle('sel',tempMode==='married');openModal('modal-mode');}
+function pickChangeMode(m){tempMode=m;document.getElementById('cm-single').classList.toggle('sel',m==='single');document.getElementById('cm-married').classList.toggle('sel',m==='married');}
+function saveMode(){if(!tempMode){closeModal('modal-mode');return;}APP.mode=tempMode;save();closeModal('modal-mode');renderAll();}
+
+/* === IMPORT/EXPORT === */
+function doExport(){const blob=new Blob([JSON.stringify(APP,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`ledger_backup_${todayStr()}.json`;a.click();URL.revokeObjectURL(url);}
+function openImport(){document.getElementById('imp-pass').value='';document.getElementById('imp-json').value='';document.getElementById('imp-err').textContent='';openModal('modal-import');}
+function doImport(){const pass=document.getElementById('imp-pass').value,raw=document.getElementById('imp-json').value.trim(),err=document.getElementById('imp-err');if(dob(APP.password)!==pass){err.textContent='Incorrect passcode.';return;}if(!raw){err.textContent='Paste JSON first.';return;}let parsed;try{parsed=JSON.parse(raw);}catch{err.textContent='Invalid JSON.';return;}if(!parsed.password||!parsed.mode||!Array.isArray(parsed.tasks)){err.textContent='Invalid data structure.';return;}APP=parsed;save();closeModal('modal-import');renderAll();}
+function doClear(){const pass=prompt('Passcode to confirm clear:');if(pass===null)return;if(dob(APP.password)!==pass){alert('Incorrect passcode.');return;}if(!confirm('Erase all data? Cannot be undone.'))return;localStorage.removeItem(SK);location.reload();}
+
+/* === MODALS === */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');if(id==='modal-bounce')stopTimer();}
+document.querySelectorAll('.mbg').forEach(bg=>{bg.addEventListener('click',e=>{if(e.target===bg)closeModal(bg.id);});});
+
+/* === UTILITY === */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+</script>
 </body>
 </html>
